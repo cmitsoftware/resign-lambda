@@ -5,6 +5,7 @@ import java.io.IOException;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.resign.backend.domain.Resource;
 
 import com.amazonaws.services.lambda.runtime.Context;
 
@@ -13,7 +14,7 @@ import com.amazonaws.services.lambda.runtime.Context;
  */
 public class CreateResourceHandlerTest {
 
-    private static String input;
+    private static Resource input;
 
     @BeforeClass
     public static void createInput() throws IOException {
