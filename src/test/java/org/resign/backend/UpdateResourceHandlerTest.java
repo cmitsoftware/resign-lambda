@@ -6,6 +6,8 @@ import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.resign.backend.domain.Resource;
+import org.resign.backend.gateway.ApiGatewayProxyResponse;
+import org.resign.backend.gateway.ApiGatewayRequest;
 
 import com.amazonaws.services.lambda.runtime.Context;
 
@@ -14,7 +16,7 @@ import com.amazonaws.services.lambda.runtime.Context;
  */
 public class UpdateResourceHandlerTest {
 
-    private static Resource input;
+    private static ApiGatewayRequest input;
 
     @BeforeClass
     public static void createInput() throws IOException {
@@ -36,7 +38,7 @@ public class UpdateResourceHandlerTest {
         UpdateResourceHandler handler = new UpdateResourceHandler();
         Context ctx = createContext();
 
-        Resource output = handler.handleRequest(input, ctx);
+        ApiGatewayProxyResponse output = handler.handleRequest(input, ctx);
 
         // TODO: validate output here if needed.
         Assert.assertEquals("Hello from Lambda!", output);

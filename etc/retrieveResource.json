@@ -1,0 +1,14 @@
+{
+    "resource": "Resource path",
+    "path": "Path parameter",
+    "httpMethod": "Incoming request's method name",
+    "headers": null,
+    "multiValueHeaders": null,
+    "queryStringParameters": {"userId":"","ts":""},
+    "multiValueQueryStringParameters": null,
+    "pathParameters":  null,
+    "stageVariables": null,
+    "requestContext": null,
+    "body": "A JSON string of the request payload.",
+    "isBase64Encoded": "false"
+}
