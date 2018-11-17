@@ -15,6 +15,11 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 
 @DynamoDBTable(tableName = "resource")
 public class Resource extends ApiResponse{
+	
+	public static final Integer STATUS_DRAFT = 1;
+	public static final Integer STATUS_CONFIRMED = 2;
+	public static final Integer STATUS_REJECTED = 3;
+	public static final Integer STATUS_DELETED = 4;
 
 	@JsonInclude(JsonInclude.Include.NON_NULL)
 	private String userId;
@@ -38,13 +43,13 @@ public class Resource extends ApiResponse{
 	private String desc;
 	
 	@JsonInclude(JsonInclude.Include.NON_NULL)
+	private Location location;
+	
+	@JsonInclude(JsonInclude.Include.NON_NULL)
     private String visibleFrom;
 	
 	@JsonInclude(JsonInclude.Include.NON_NULL)
     private String visibleTo;
-	
-	@JsonInclude(JsonInclude.Include.NON_NULL)
-    private String creation;
 	
 	@JsonInclude(JsonInclude.Include.NON_NULL)
     private String activation;
@@ -160,15 +165,6 @@ public class Resource extends ApiResponse{
 
 	public void setVisibleTo(String visibleTo) {
 		this.visibleTo = visibleTo;
-	}
-
-	@DynamoDBAttribute
-	public String getCreation() {
-		return creation;
-	}
-
-	public void setCreation(String creation) {
-		this.creation = creation;
 	}
 
 	@DynamoDBAttribute

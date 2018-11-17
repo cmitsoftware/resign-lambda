@@ -1,5 +1,6 @@
 package org.resign.backend.gateway;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import org.resign.backend.domain.Resource;
@@ -44,6 +45,10 @@ public class ApiGatewayProxyResponse {
 
     public ApiGatewayProxyResponse(int statusCode, Map<String, String> headers, String body) {
         this.statusCode = statusCode;
+        headers = new HashMap<String, String>();
+        headers.put("access-control-allow-origin", "*");
+        headers.put("access-control-allow-headers", "Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token");
+        headers.put("access-control-allow-methods", "GET,POST,PUT,OPTIONS");
         this.headers = headers;
         this.body = body;
     }

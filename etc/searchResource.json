@@ -4,7 +4,7 @@
     "httpMethod": "Incoming request's method name",
     "headers": null,
     "multiValueHeaders": null,
-    "queryStringParameters": {"search":"","type":"","s":"0","l":"5"},
+    "queryStringParameters": {"userId":"","ts":""},
     "multiValueQueryStringParameters": null,
     "pathParameters":  null,
     "stageVariables": null,
