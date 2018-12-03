@@ -1,12 +1,14 @@
 package org.resign.backend.domain;
 
 import java.util.ArrayList;
+
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBAttribute;
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBDocument;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBHashKey;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBRangeKey;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTable;
@@ -56,6 +58,9 @@ public class Resource extends ApiResponse{
 	
 	@JsonInclude(JsonInclude.Include.NON_NULL)
 	private List<Tag> tags;
+	
+	@JsonInclude(JsonInclude.Include.NON_NULL)
+	private List<Image> images;
 	
 	public Resource() {}
 
@@ -185,6 +190,23 @@ public class Resource extends ApiResponse{
 		this.tags = tags;
 	}
 	
+	public Location getLocation() {
+		return location;
+	}
+
+	public void setLocation(Location location) {
+		this.location = location;
+	}
+
+	@DynamoDBAttribute
+	public List<Image> getImages() {
+		return images;
+	}
+
+	public void setImages(List<Image> images) {
+		this.images = images;
+	}
+
 	@Override
 	public String toString() {
 		return "Resource [userId=" + userId + ", type=" + type + ", ts=" + ts + ", name=" + name

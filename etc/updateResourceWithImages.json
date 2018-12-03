@@ -1,0 +1,14 @@
+{
+    "resource": "Resource path",
+    "path": "Path parameter",
+    "httpMethod": "Incoming request's method name",
+    "headers": null,
+    "multiValueHeaders": null,
+    "queryStringParameters": null,
+    "multiValueQueryStringParameters": null,
+    "pathParameters":  null,
+    "stageVariables": null,
+    "requestContext": null,
+    "isBase64Encoded": "false",
+    "body": "{\"userId\":\"cerri\",\"ts\":\"20181104102840\",\"type\":1,\"name\":\"test proxy api gateway put\",\"location\":{\"country\":\"Italia\",\"administrative_area_1\":\"Lombardia\",\"administrative_area_2\":\"Varese\",\"lat\":\"45.7361297\",\"lng\":\"8.825546\"},\"tags\":[{\"uuid\":\"12345\",\"name\":\"tag 1\"},{\"uuid\":\"tag2\",\"name\":\"tag2\"}],\"images\":[{\"url\":\"https://s3.eu-west-3.amazonaws.com/resign-test-resource-images/cerri/20181104102840/valsavarenche.jpg\",\"name\":\"image test 1\"}]}"
+}

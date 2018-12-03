@@ -9,6 +9,6 @@
     "pathParameters":  null,
     "stageVariables": null,
     "requestContext": null,
-    "body": "{\"userId\":\"cerri\",\"ts\":\"20181104100742\",\"type\":1,\"name\":\"test proxy api gateway put\",\"tags\":[{\"uuid\":\"12345\",\"name\":\"tag 1\"},{\"uuid\":\"tag2\",\"name\":\"tag2\"}]}",
-    "isBase64Encoded": "false"
+    "isBase64Encoded": "false",
+    "body": "{\"userId\":\"cerri\",\"ts\":\"20181104102840\",\"type\":1,\"name\":\"test proxy api gateway put\",\"location\":{\"country\":\"Italia\",\"administrative_area_1\":\"Lombardia\",\"administrative_area_2\":\"Varese\",\"lat\":\"45.7361297\",\"lng\":\"8.825546\"},\"tags\":[{\"uuid\":\"12345\",\"name\":\"tag 1\"},{\"uuid\":\"tag2\",\"name\":\"tag2\"}]}"
 }

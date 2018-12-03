@@ -1,7 +1,9 @@
 package org.resign.backend.domain;
 
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBDocument;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
+@DynamoDBDocument
 public class Location {
 
 	@JsonInclude(JsonInclude.Include.NON_NULL)
