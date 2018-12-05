@@ -30,7 +30,7 @@ public class UpdateResourceHandler implements RequestHandler<ApiGatewayRequest, 
 		    			&& !StringUtils.isNullOrEmpty(resource.getTs())) {
 		    		try {
 		    			AmazonDynamoDB ddb = AmazonDynamoDBClientBuilder.standard()
-			    				.withRegion(Regions.EU_WEST_2)
+			    				.withRegion(Regions.EU_WEST_3)
 			    				.build();
 			    		DynamoDBMapper mapper = new DynamoDBMapper(ddb);
 			    		mapper.save(resource);

@@ -31,7 +31,7 @@ public class RetrieveResourceHandler implements RequestHandler<ApiGatewayRequest
     	if(!StringUtils.isNullOrEmpty(userId) && !StringUtils.isNullOrEmpty(ts)) {
     		
     		AmazonDynamoDB ddb = AmazonDynamoDBClientBuilder.standard()
-    				.withRegion(Regions.EU_WEST_2)
+    				.withRegion(Regions.EU_WEST_3)
     				.build();
     		DynamoDBMapper mapper = new DynamoDBMapper(ddb);
     		ret = mapper.load(Resource.class, userId, ts);
@@ -63,7 +63,7 @@ public class RetrieveResourceHandler implements RequestHandler<ApiGatewayRequest
 //		try {
 //
 //			AmazonDynamoDB ddb = AmazonDynamoDBClientBuilder.standard()
-//					.withRegion(Regions.EU_WEST_2)
+//					.withRegion(Regions.EU_WEST_3)
 //					.build();
 //			
 ////			HashMap<String,AttributeValue> fetchKey = new HashMap<String,AttributeValue>();
