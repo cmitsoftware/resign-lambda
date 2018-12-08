@@ -1,9 +1,27 @@
 package org.resign.backend;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
+import org.apache.http.HttpHost;
+import org.elasticsearch.action.search.SearchRequest;
+import org.elasticsearch.action.search.SearchRequestBuilder;
+import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.client.RestClient;
+import org.elasticsearch.client.RestHighLevelClient;
+import org.elasticsearch.common.unit.TimeValue;
+import org.elasticsearch.index.query.BoolQueryBuilder;
+import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.index.query.QueryStringQueryBuilder;
+import org.elasticsearch.index.query.TermQueryBuilder;
+import org.elasticsearch.search.SearchHit;
+import org.elasticsearch.search.SearchHits;
+import org.elasticsearch.search.builder.SearchSourceBuilder;
+import org.elasticsearch.search.sort.SortOrder;
 import org.resign.backend.domain.Resource;
 import org.resign.backend.gateway.ApiGatewayProxyResponse;
 import org.resign.backend.gateway.ApiGatewayRequest;
@@ -36,7 +54,8 @@ public class SearchResourceHandler implements RequestHandler<ApiGatewayRequest, 
     	
     	String search = null;
     	Integer type = null;
-    	String address = null;
+    	String[] tags = null;
+//    	String address = null;
     	Integer start = null;
     	Integer length = null;
     	String order = null;
@@ -48,6 +67,14 @@ public class SearchResourceHandler implements RequestHandler<ApiGatewayRequest, 
     			String typeS = request.getQueryStringParameters().get("type");
     			if(!StringUtils.isNullOrEmpty(typeS)) {
     				type = Integer.parseInt(typeS);
+    			}
+    		} catch (Exception e) {
+    			context.getLogger().log("Error: " + e.getMessage());
+    		}
+    		try {
+    			String tagsS = request.getQueryStringParameters().get("tags");
+    			if(!StringUtils.isNullOrEmpty(tagsS)) {
+    				tags = tagsS.split(",");
     			}
     		} catch (Exception e) {
     			context.getLogger().log("Error: " + e.getMessage());
@@ -72,36 +99,120 @@ public class SearchResourceHandler implements RequestHandler<ApiGatewayRequest, 
     		dir = request.getQueryStringParameters().get("d");
     	}
     	
-    	AmazonDynamoDB ddb = AmazonDynamoDBClientBuilder.standard()
-    			.withRegion(Regions.EU_WEST_3)
-    			.build();
-    	DynamoDBMapper mapper = new DynamoDBMapper(ddb);
+//    	AmazonDynamoDB ddb = AmazonDynamoDBClientBuilder.standard()
+//    			.withRegion(Regions.EU_WEST_3)
+//    			.build();
+//    	DynamoDBMapper mapper = new DynamoDBMapper(ddb);
+//    	
+//    	Map<String, AttributeValue> eav = new HashMap<String, AttributeValue>();
+//    	eav.put(":status", new AttributeValue().withN(String.valueOf(Resource.STATUS_CONFIRMED)));
+//    	if(!StringUtils.isNullOrEmpty(search)) {
+//    		eav.put(":name", new AttributeValue().withS(search));
+//    		eav.put(":surname", new AttributeValue().withS(search));
+//    		eav.put(":desc", new AttributeValue().withS(search));
+//    	}
+//    	
+//    	DynamoDBScanExpression scanExpression = new DynamoDBScanExpression();
+//    	String filter = "resStatus = :status"; 
+//    	if(!StringUtils.isNullOrEmpty(search)) {
+//    		filter += " and (contains(name, :name) or contains(surname, :surname)) or contains(desc, :desc))";
+//    	}
+//    	scanExpression.withFilterExpression(filter.trim()).withExpressionAttributeValues(eav);
+//        List<Resource> searchResult = mapper.scan(Resource.class, scanExpression);
+//
+    	RestHighLevelClient client = new RestHighLevelClient(
+                RestClient.builder(new HttpHost("search-resign-test-es-bkh4z7fqh2avchcg57ekp2tmt4.eu-west-3.es.amazonaws.com", 443, "https")));
+            	
+//    	{
+//    		  "query": {
+//    		    "bool": {
+//    		      "must": [
+//    		        {
+//    		          "query_string" : {
+//    		            "query" : "Varese",
+//    		            "fields": ["name", "surname","desc","location.administrative_area_2","tags.name"]
+//    		          }
+//    		        },
+//    		        {
+//    		          "term" : {
+//    		          	"tags.uuid" : 2
+//    		          }
+//    		        },
+//    		        {
+//    		          "term" : {
+//    		          	"location.administrative_area_2" : "varese"
+//    		          }
+//    		        }
+//    		      ]
+//    		    }
+//    		  }
+//    		}
     	
-    	Map<String, AttributeValue> eav = new HashMap<String, AttributeValue>();
-    	eav.put(":status", new AttributeValue().withN(String.valueOf(Resource.STATUS_CONFIRMED)));
+    	
+    	BoolQueryBuilder mainQuery = QueryBuilders.boolQuery();
     	if(!StringUtils.isNullOrEmpty(search)) {
-    		eav.put(":name", new AttributeValue().withS(search));
-    		eav.put(":surname", new AttributeValue().withS(search));
-    		eav.put(":desc", new AttributeValue().withS(search));
+    		
+    		/*
+    		 * Full text search on text fields
+    		 */
+    		QueryStringQueryBuilder fullTextQuery = QueryBuilders.queryStringQuery(search + "*");
+    		fullTextQuery.field("name");
+    		fullTextQuery.field("surname");
+    		fullTextQuery.field("desc");
+    		fullTextQuery.field("location.administrative_area_1");
+    		fullTextQuery.field("location.administrative_area_2");
+    		fullTextQuery.field("tags.name");
+    		mainQuery.must(fullTextQuery);
+    	}
+    	if(type != null) {
+    		
+    		/*
+    		 * Exact filter on type
+    		 */
+    		TermQueryBuilder typeQuery = QueryBuilders.termQuery("type", type);
+    		mainQuery.must(typeQuery);
+    	}
+    	if(tags != null) {
+    		
+    		/*
+    		 * Exact filter on each tag
+    		 */
+    		for(String t: tags) {
+    			TermQueryBuilder tagQuery = QueryBuilders.termQuery("tags.uuid", t);
+    			mainQuery.must(tagQuery);
+    		}
     	}
     	
-    	DynamoDBScanExpression scanExpression = new DynamoDBScanExpression();
-    	String filter = "resStatus = :status"; 
-    	if(!StringUtils.isNullOrEmpty(search)) {
-    		filter += " and (contains(name, :name) or contains(surname, :surname)) or contains(desc, :desc))";
-    	}
-    	scanExpression.withFilterExpression(filter.trim()).withExpressionAttributeValues(eav);
-        List<Resource> searchResult = mapper.scan(Resource.class, scanExpression);
-
-        ObjectMapper objectMapper = new ObjectMapper();
+    	SearchRequest searchRequest = new SearchRequest(); 
+    	SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder(); 
+    	searchSourceBuilder.query(mainQuery);
+    	searchSourceBuilder.sort(order, SortOrder.fromString(dir));
+    	searchSourceBuilder.from(start);
+    	searchSourceBuilder.size(length);
+    	searchSourceBuilder.timeout(new TimeValue(5, TimeUnit.SECONDS));
+    	searchRequest.source(searchSourceBuilder);
+    	
     	String reply = null;
-		try {
-			reply = objectMapper.writeValueAsString(searchResult);
-		} catch (JsonProcessingException e) {
+    	try {
+			SearchResponse searchResponse = client.search(searchRequest);
+			SearchHits hits = searchResponse.getHits();
+			for(SearchHit h: hits.getHits()) {
+				String sourceAsString = h.getSourceAsString();
+				for(String f: h.getFields().keySet()) {
+					context.getLogger().log(f + " : " + h.getFields().get(f));
+				}
+			}
+    	
+	        ObjectMapper objectMapper = new ObjectMapper();
+	    	
+//			reply = objectMapper.writeValueAsString(searchResult);
+			reply = objectMapper.writeValueAsString(new ArrayList<Resource>());
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
         ApiGatewayProxyResponse response = new ApiGatewayProxyResponse(200, null, reply);
         return response;
+    	
     }
 
 }
