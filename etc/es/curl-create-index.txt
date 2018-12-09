@@ -1,0 +1,39 @@
+curl -X PUT "https://search-resign-test-es-bkh4z7fqh2avchcg57ekp2tmt4.eu-west-3.es.amazonaws.com/resources" -H 'Content-Type: application/json' -d'
+
+{
+    "settings" : {
+        "index" : {
+            "number_of_shards" : 3, 
+            "number_of_replicas" : 2 
+        }
+    },
+   "mappings" : {
+        "res" : {
+              "properties" : {
+				"userId" : { "type" : "text" },
+				"ts" : { "type" : "date" },
+				"type" : { "type" : "integer" },
+				"name" : { "type" : "text" },
+				"surname" : { "type" : "text" },
+				"desc" : { "type" : "text" },
+				"location" : {
+				  "properties": {
+					"country":{ "type": "text"  },
+					"administrative_area_1":{ "type": "text"  },
+					"administrative_area_2":{ "type": "text"}
+				  }
+				},
+				"geoLocation": { "type": "geo_point"},
+				"visibleFrom": { "type": "date"},
+				"visibleTo": { "type": "date"},
+				"tags":{
+				  "properties": {
+					"uuid":{ "type": "text"  },
+					"name":{ "type": "text"  }
+				  }
+				}
+			  }
+          }      
+		}
+   }
+}

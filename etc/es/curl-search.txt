@@ -1,0 +1,37 @@
+curl -X POST "https://search-resign-test-es-bkh4z7fqh2avchcg57ekp2tmt4.eu-west-3.es.amazonaws.com/resources/_search" -H 'Content-Type: application/json' -d'
+{
+  "query": {
+	    "bool": {
+	        "must": [
+	            {
+	                "query_string": {
+	                    "query": "1*",
+	                    "fields": [
+	                        "desc^1.0",
+	                        "location.administrative_area_1^1.0",
+	                        "location.administrative_area_2^1.0",
+	                        "name^1.0",
+	                        "surname^1.0",
+	                        "tags.name^1.0"
+	                    ],
+	                    "type": "best_fields",
+	                    "default_operator": "or",
+	                    "max_determinized_states": 10000,
+	                    "enable_position_increments": true,
+	                    "fuzziness": "AUTO",
+	                    "fuzzy_prefix_length": 0,
+	                    "fuzzy_max_expansions": 50,
+	                    "phrase_slop": 0,
+	                    "escape": false,
+	                    "auto_generate_synonyms_phrase_query": true,
+	                    "fuzzy_transpositions": true,
+	                    "boost": 1
+	                }
+	            }
+	        ],
+	        "adjust_pure_negative": true,
+	        "boost": 1
+	    }
+	}
+}
+'

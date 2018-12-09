@@ -189,17 +189,19 @@ public class SearchResourceHandler implements RequestHandler<ApiGatewayRequest, 
     	searchSourceBuilder.sort(order, SortOrder.fromString(dir));
     	searchSourceBuilder.from(start);
     	searchSourceBuilder.size(length);
-    	searchSourceBuilder.timeout(new TimeValue(5, TimeUnit.SECONDS));
+    	searchSourceBuilder.timeout(new TimeValue(60, TimeUnit.SECONDS));
     	searchRequest.source(searchSourceBuilder);
-    	
+    	context.getLogger().log(mainQuery.toString());
     	String reply = null;
     	try {
 			SearchResponse searchResponse = client.search(searchRequest);
 			SearchHits hits = searchResponse.getHits();
 			for(SearchHit h: hits.getHits()) {
 				String sourceAsString = h.getSourceAsString();
-				for(String f: h.getFields().keySet()) {
-					context.getLogger().log(f + " : " + h.getFields().get(f));
+				context.getLogger().log("source as string: " + sourceAsString);
+				
+				for(String f: h.getSourceAsMap().keySet()) {
+					context.getLogger().log(f + " : " + h.getSourceAsMap().get(f));
 				}
 			}
     	
