@@ -205,20 +205,20 @@ public class SearchResourceHandler implements RequestHandler<ApiGatewayRequest, 
     			mainQuery.must(tagQuery);
     		}
     	}
-		if(area1 != null) {
+		if(!StringUtils.isNullOrEmpty(area1)) {
 		    		
 			/*
 			 * Exact filter on administrative area 1
 			 */
-			TermQueryBuilder area1Query = QueryBuilders.termQuery(Resource.LOCATION + "." + Resource.ADMINISTRATIVE_AREA_1, type);
+			TermQueryBuilder area1Query = QueryBuilders.termQuery(Resource.LOCATION + "." + Resource.ADMINISTRATIVE_AREA_1, area1);
 			mainQuery.must(area1Query);
 		}
-		if(area2 != null) {
+		if(!StringUtils.isNullOrEmpty(area2)) {
 			
 			/*
 			 * Exact filter on administrative area 2
 			 */
-			TermQueryBuilder area2Query = QueryBuilders.termQuery(Resource.LOCATION + "." + Resource.ADMINISTRATIVE_AREA_2, type);
+			TermQueryBuilder area2Query = QueryBuilders.termQuery(Resource.LOCATION + "." + Resource.ADMINISTRATIVE_AREA_2, area2);
 			mainQuery.must(area2Query);
 		}
 		
@@ -234,6 +234,11 @@ public class SearchResourceHandler implements RequestHandler<ApiGatewayRequest, 
 		visibleFromQuery.should(new RangeQueryBuilder(Resource.VISIBLE_FROM).lte("now"));
 		visibleFromQuery.should(QueryBuilders.boolQuery().mustNot(new ExistsQueryBuilder(Resource.VISIBLE_FROM)));
 		mainQuery.must(visibleFromQuery);
+		
+		BoolQueryBuilder visibleToQuery = QueryBuilders.boolQuery();
+		visibleToQuery.should(new RangeQueryBuilder(Resource.VISIBLE_TO).gte("now"));
+		visibleToQuery.should(QueryBuilders.boolQuery().mustNot(new ExistsQueryBuilder(Resource.VISIBLE_TO)));
+		mainQuery.must(visibleToQuery);
     	
     	SearchRequest searchRequest = new SearchRequest(); 
     	SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder(); 
