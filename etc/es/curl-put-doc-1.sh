@@ -1,3 +1,4 @@
+curl -X PUT "https://search-resign-test-es-bkh4z7fqh2avchcg57ekp2tmt4.eu-west-3.es.amazonaws.com/resources/res/cerri1" -H 'Content-Type: application/json' -d'
 {
 	"userId":"cerri",
 	"ts":"2018-12-08T10:20:30Z",
@@ -20,3 +21,4 @@
 		{"uuid":"2","name":"tag 2"}
 	]
 }
+'

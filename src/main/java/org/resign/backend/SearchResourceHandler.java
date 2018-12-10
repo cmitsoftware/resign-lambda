@@ -5,14 +5,17 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.http.HttpHost;
+import org.apache.lucene.search.BooleanQuery;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.index.query.BoolQueryBuilder;
+import org.elasticsearch.index.query.ExistsQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.QueryStringQueryBuilder;
+import org.elasticsearch.index.query.RangeQueryBuilder;
 import org.elasticsearch.index.query.TermQueryBuilder;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
@@ -92,39 +95,86 @@ public class SearchResourceHandler implements RequestHandler<ApiGatewayRequest, 
                 RestClient.builder(new HttpHost("search-resign-test-es-bkh4z7fqh2avchcg57ekp2tmt4.eu-west-3.es.amazonaws.com", 443, "https")));
             	
 //    	{
-//    		  "query": {
-//    		    "bool": {
-//    		      "must": [
-//    		        {
-//    		          "query_string" : {
-//    		            "query" : "Varese",
-//    		            "fields": ["name", "surname","desc","location.administrative_area_2","tags.name"]
-//    		          }
-//    		        },
-//    		        {
-//    		          "term" : {
-//    		          	"tags.uuid" : 2
-//    		          }
-//    		        },
-//    				{
+//  		  "query": {
+//  		    "bool": {
+//  		      "must": [
+//  		        {
+//  		          "query_string" : {
+//  		            "query" : "Varese",
+//  		            "fields": ["name", "surname","desc","location.administrative_area_2","tags.name"]
+//  		          }
+//  		        },
+//  		        {
+//  		          "term" : {
+//  		          	"tags.uuid" : 2
+//  		          }
+//  		        },
+//  				{
 //			          "term" : {
 //			          	"location.administrative_area_1" : "lombardia"
 //			          }
-//			        }
-//    		        {
-//    		          "term" : {
-//    		          	"location.administrative_area_2" : "varese"
-//    		          }
-//    		        }
-//    		      ]
-//    		    }
-//    		  }
-//    		}
-    	
+//			        },
+//  		        {
+//  		          "term" : {
+//  		          	"location.administrative_area_2" : "varese"
+//  		          }
+//  		        },
+//					{
+//  		          "term" : {
+//  		          	"resStatus" : 2
+//  		          }
+//  		        },
+//                  {
+//                    "bool": {
+//                    	"should": [
+//                        {
+//                           "range" : {
+//                             "visibleFrom" : {
+//                               "lte": "now"
+//                            }
+//                          }
+//                        },
+//                        {
+//                        	"bool": {
+//                            "must_not": {
+//                              "exists": {
+//                                "field": "visibleFrom"
+//                              }
+//                            }
+//                          }
+//                        }
+//                      ]
+//                    }
+//                  },
+//					{
+//                    "bool": {
+//                    	"should": [
+//                        {
+//                           "range" : {
+//                             "visibleTo" : {
+//                               "gte": "now"
+//                            }
+//                          }
+//                        },
+//                        {
+//                        	"bool": {
+//                            "must_not": {
+//                              "exists": {
+//                                "field": "visibleTo"
+//                              }
+//                            }
+//                          }
+//                        }
+//                      ]
+//                    }
+//                  }
+//  		      ]
+//  		    }
+//  		  }
+//  		}
     	
     	BoolQueryBuilder mainQuery = QueryBuilders.boolQuery();
     	if(!StringUtils.isNullOrEmpty(search)) {
-    		
     		/*
     		 * Full text search on text fields
     		 */
@@ -171,7 +221,19 @@ public class SearchResourceHandler implements RequestHandler<ApiGatewayRequest, 
 			TermQueryBuilder area2Query = QueryBuilders.termQuery(Resource.LOCATION + "." + Resource.ADMINISTRATIVE_AREA_2, type);
 			mainQuery.must(area2Query);
 		}
-
+		
+		/*
+		 * Only resources confirmed 
+		 */
+		mainQuery.must(QueryBuilders.termQuery(Resource.RES_STATUS, Resource.STATUS_CONFIRMED));
+		
+		/*
+		 * Only resources visible
+		 */
+		BoolQueryBuilder visibleFromQuery = QueryBuilders.boolQuery();
+		visibleFromQuery.should(new RangeQueryBuilder(Resource.VISIBLE_FROM).lte("now"));
+		visibleFromQuery.should(QueryBuilders.boolQuery().mustNot(new ExistsQueryBuilder(Resource.VISIBLE_FROM)));
+		mainQuery.must(visibleFromQuery);
     	
     	SearchRequest searchRequest = new SearchRequest(); 
     	SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder(); 

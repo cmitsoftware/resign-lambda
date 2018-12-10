@@ -5,6 +5,7 @@
 	"name":"name 2",
 	"surname":"surname 2",
 	"desc":"desc 2",
+	"resStatus":2,
 	"location":{
 		"administrative_area_1":"Lombardia",
 		"administrative_area_2":"Varese",
