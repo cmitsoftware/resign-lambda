@@ -1,11 +1,14 @@
 package org.resign.backend.domain;
 
+import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.elasticsearch.search.SearchHit;
+import org.resign.backend.Constants;
 
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBAttribute;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBHashKey;
@@ -28,6 +31,7 @@ public class Resource extends ApiResponse{
 	public static final String COUNTRY = "country";
 	public static final String ADMINISTRATIVE_AREA_1 = "administrative_area_1";
 	public static final String ADMINISTRATIVE_AREA_2 = "administrative_area_2";
+	public static final String GEO_LOCATION = "geoLocation";
 	public static final String LAT = "lat";
 	public static final String LON = "lon";
 	public static final String VISIBLE_FROM = "visibleFrom";
@@ -86,26 +90,60 @@ public class Resource extends ApiResponse{
 	
 	public Resource() {}
 	
-	public static Resource buildFromSearchHit(SearchHit h) {
+	@SuppressWarnings("unchecked")
+	public static Resource buildFromMap(Map<String, Object> sourceMap) throws Exception {
 		
 		Resource r = new Resource();
-		r.setUserId(h.getFields().get(USER_ID).getValue());
-		r.setTs(h.getFields().get(TS).getValue());
-		if(h.getFields().containsKey(TYPE)) {
-			r.setType(h.getFields().get(TYPE).getValue());
+		r.setUserId((String)sourceMap.get(Resource.USER_ID));
+		r.setTs(Constants.ddbFullDateFormat.format(Constants.esFullDateFormat.parse((String)sourceMap.get(Resource.TS))));
+		if(sourceMap.containsKey(NAME)) {
+			r.setName((String)sourceMap.get(NAME));
 		}
-		if(h.getFields().containsKey(NAME)) {
-			r.setName(h.getFields().get(NAME).getValue());
+		if(sourceMap.containsKey(SURNAME)) {
+			r.setSurname((String)sourceMap.get(SURNAME));
 		}
-		if(h.getFields().containsKey(SURNAME)) {
-			r.setSurname(h.getFields().get(SURNAME).getValue());
+		if(sourceMap.containsKey(DESC)) {
+			r.setDesc((String)sourceMap.get(DESC));
 		}
-		if(h.getFields().containsKey(DESC)) {
-			r.setDesc(h.getFields().get(DESC).getValue());
+		if(sourceMap.containsKey(TYPE)) {
+			r.setType((Integer)sourceMap.get(TYPE));
 		}
-		if(h.getFields().containsKey(RES_STATUS)) {
-			r.setResStatus(h.getFields().get(RES_STATUS).getValue());
+		Location location = new Location();
+		if(sourceMap.containsKey(LOCATION)) {
+			HashMap<String, Object> locationMap = (HashMap<String, Object>)sourceMap.get(LOCATION);
+			if(locationMap.containsKey(COUNTRY)) {
+				location.setCountry((String)locationMap.get(COUNTRY));
+			}
+			if(locationMap.containsKey(ADMINISTRATIVE_AREA_1)) {
+				location.setAdministrative_area_1((String)locationMap.get(ADMINISTRATIVE_AREA_1));
+			}
+			if(locationMap.containsKey(ADMINISTRATIVE_AREA_2)) {
+				location.setAdministrative_area_2((String)locationMap.get(ADMINISTRATIVE_AREA_2));
+			}
 		}
+		if(sourceMap.containsKey(GEO_LOCATION)) {
+			HashMap<String, Object> geoLocationMap = (HashMap<String, Object>)sourceMap.get(GEO_LOCATION);
+			if(geoLocationMap.containsKey(LAT) && geoLocationMap.containsKey(LON)) {
+				location.setLat((Double)geoLocationMap.get(LAT));
+				location.setLng((Double)geoLocationMap.get(LON));
+			}
+		}
+		r.setLocation(location);
+		
+		List<Tag> tags = new ArrayList<Tag>();
+		if(sourceMap.containsKey(TAGS)) {
+			ArrayList<HashMap<String, Object>> tagList = (ArrayList<HashMap<String, Object>>)sourceMap.get(TAGS);
+			for(HashMap<String, Object> t: tagList) {
+				if(t.containsKey(TAG_UUID) && t.containsKey(TAG_NAME)) {
+					Tag tag = new Tag();
+					tag.setUuid((String)t.get(TAG_UUID));
+					tag.setName((String)t.get(TAG_NAME));
+					tags.add(tag);
+				}
+			}
+		}
+		r.setTags(tags);
+		
 		return r;
 	}
 

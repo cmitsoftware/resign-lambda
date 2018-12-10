@@ -18,7 +18,7 @@ public class AddImageToResourceHandler implements RequestHandler<ApiGatewayReque
 		context.getLogger().log("Request: " + request.toString());
 		ObjectMapper objectMapper = new ObjectMapper();
 
-    	String ts = Constants.tsDateFormat.format(new Date());
+    	String ts = Constants.ddbFullDateFormat.format(new Date());
     	Resource resource = null;
     	ApiGatewayProxyResponse response = null;
     	if(request.getBody() != null) {

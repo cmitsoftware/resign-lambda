@@ -1,15 +1,11 @@
 package org.resign.backend;
 
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.http.HttpHost;
 import org.elasticsearch.action.search.SearchRequest;
-import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestHighLevelClient;
@@ -26,16 +22,9 @@ import org.resign.backend.domain.Resource;
 import org.resign.backend.gateway.ApiGatewayProxyResponse;
 import org.resign.backend.gateway.ApiGatewayRequest;
 
-import com.amazonaws.regions.Regions;
-import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
-import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
-import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
-import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBScanExpression;
-import com.amazonaws.services.dynamodbv2.model.AttributeValue;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.amazonaws.util.StringUtils;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class SearchResourceHandler implements RequestHandler<ApiGatewayRequest, ApiGatewayProxyResponse> {
@@ -43,19 +32,13 @@ public class SearchResourceHandler implements RequestHandler<ApiGatewayRequest, 
     @Override
     public ApiGatewayProxyResponse handleRequest(ApiGatewayRequest request, Context context) {
 
-    	//search: search token
-    	//type: type of resource
-    	//s: start index
-    	//l: length
-    	//o: order (default ts)
-    	//d: order direction (default desc)
-    	
     	context.getLogger().log("Request: " + request.toString());
     	
     	String search = null;
     	Integer type = null;
     	String[] tags = null;
-//    	String address = null;
+    	String area1 = null;
+    	String area2 = null;
     	Integer start = null;
     	Integer length = null;
     	String order = null;
@@ -79,6 +62,8 @@ public class SearchResourceHandler implements RequestHandler<ApiGatewayRequest, 
     		} catch (Exception e) {
     			context.getLogger().log("Error: " + e.getMessage());
     		}
+    		area1 = request.getQueryStringParameters().get("area1");
+    		area2 = request.getQueryStringParameters().get("area2");
     		try {
     			String startS = request.getQueryStringParameters().get("s");
     			if(!StringUtils.isNullOrEmpty(startS)) {
@@ -99,27 +84,10 @@ public class SearchResourceHandler implements RequestHandler<ApiGatewayRequest, 
     		dir = request.getQueryStringParameters().get("d");
     	}
     	
-//    	AmazonDynamoDB ddb = AmazonDynamoDBClientBuilder.standard()
-//    			.withRegion(Regions.EU_WEST_3)
-//    			.build();
-//    	DynamoDBMapper mapper = new DynamoDBMapper(ddb);
-//    	
-//    	Map<String, AttributeValue> eav = new HashMap<String, AttributeValue>();
-//    	eav.put(":status", new AttributeValue().withN(String.valueOf(Resource.STATUS_CONFIRMED)));
-//    	if(!StringUtils.isNullOrEmpty(search)) {
-//    		eav.put(":name", new AttributeValue().withS(search));
-//    		eav.put(":surname", new AttributeValue().withS(search));
-//    		eav.put(":desc", new AttributeValue().withS(search));
-//    	}
-//    	
-//    	DynamoDBScanExpression scanExpression = new DynamoDBScanExpression();
-//    	String filter = "resStatus = :status"; 
-//    	if(!StringUtils.isNullOrEmpty(search)) {
-//    		filter += " and (contains(name, :name) or contains(surname, :surname)) or contains(desc, :desc))";
-//    	}
-//    	scanExpression.withFilterExpression(filter.trim()).withExpressionAttributeValues(eav);
-//        List<Resource> searchResult = mapper.scan(Resource.class, scanExpression);
-//
+    	/*
+    	 * TODO
+    	 * Make parametric
+    	 */
     	RestHighLevelClient client = new RestHighLevelClient(
                 RestClient.builder(new HttpHost("search-resign-test-es-bkh4z7fqh2avchcg57ekp2tmt4.eu-west-3.es.amazonaws.com", 443, "https")));
             	
@@ -138,6 +106,11 @@ public class SearchResourceHandler implements RequestHandler<ApiGatewayRequest, 
 //    		          	"tags.uuid" : 2
 //    		          }
 //    		        },
+//    				{
+//			          "term" : {
+//			          	"location.administrative_area_1" : "lombardia"
+//			          }
+//			        }
 //    		        {
 //    		          "term" : {
 //    		          	"location.administrative_area_2" : "varese"
@@ -156,12 +129,12 @@ public class SearchResourceHandler implements RequestHandler<ApiGatewayRequest, 
     		 * Full text search on text fields
     		 */
     		QueryStringQueryBuilder fullTextQuery = QueryBuilders.queryStringQuery(search + "*");
-    		fullTextQuery.field("name");
-    		fullTextQuery.field("surname");
-    		fullTextQuery.field("desc");
-    		fullTextQuery.field("location.administrative_area_1");
-    		fullTextQuery.field("location.administrative_area_2");
-    		fullTextQuery.field("tags.name");
+    		fullTextQuery.field(Resource.NAME);
+    		fullTextQuery.field(Resource.SURNAME);
+    		fullTextQuery.field(Resource.DESC);
+    		fullTextQuery.field(Resource.LOCATION + "." + Resource.ADMINISTRATIVE_AREA_1);
+    		fullTextQuery.field(Resource.LOCATION + "." + Resource.ADMINISTRATIVE_AREA_2);
+    		fullTextQuery.field(Resource.TAGS + "." + Resource.TAG_NAME);
     		mainQuery.must(fullTextQuery);
     	}
     	if(type != null) {
@@ -169,7 +142,7 @@ public class SearchResourceHandler implements RequestHandler<ApiGatewayRequest, 
     		/*
     		 * Exact filter on type
     		 */
-    		TermQueryBuilder typeQuery = QueryBuilders.termQuery("type", type);
+    		TermQueryBuilder typeQuery = QueryBuilders.termQuery(Resource.TYPE, type);
     		mainQuery.must(typeQuery);
     	}
     	if(tags != null) {
@@ -178,10 +151,27 @@ public class SearchResourceHandler implements RequestHandler<ApiGatewayRequest, 
     		 * Exact filter on each tag
     		 */
     		for(String t: tags) {
-    			TermQueryBuilder tagQuery = QueryBuilders.termQuery("tags.uuid", t);
+    			TermQueryBuilder tagQuery = QueryBuilders.termQuery(Resource.TAGS + "." + Resource.TAG_UUID, t);
     			mainQuery.must(tagQuery);
     		}
     	}
+		if(area1 != null) {
+		    		
+			/*
+			 * Exact filter on administrative area 1
+			 */
+			TermQueryBuilder area1Query = QueryBuilders.termQuery(Resource.LOCATION + "." + Resource.ADMINISTRATIVE_AREA_1, type);
+			mainQuery.must(area1Query);
+		}
+		if(area2 != null) {
+			
+			/*
+			 * Exact filter on administrative area 2
+			 */
+			TermQueryBuilder area2Query = QueryBuilders.termQuery(Resource.LOCATION + "." + Resource.ADMINISTRATIVE_AREA_2, type);
+			mainQuery.must(area2Query);
+		}
+
     	
     	SearchRequest searchRequest = new SearchRequest(); 
     	SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder(); 
@@ -193,22 +183,23 @@ public class SearchResourceHandler implements RequestHandler<ApiGatewayRequest, 
     	searchRequest.source(searchSourceBuilder);
     	context.getLogger().log(mainQuery.toString());
     	String reply = null;
+    	List<Resource> ret = new ArrayList<Resource>();
     	try {
 			SearchResponse searchResponse = client.search(searchRequest);
 			SearchHits hits = searchResponse.getHits();
 			for(SearchHit h: hits.getHits()) {
-				String sourceAsString = h.getSourceAsString();
-				context.getLogger().log("source as string: " + sourceAsString);
-				
-				for(String f: h.getSourceAsMap().keySet()) {
-					context.getLogger().log(f + " : " + h.getSourceAsMap().get(f));
+//				String sourceAsString = h.getSourceAsString();
+//				context.getLogger().log("source as string: " + sourceAsString);
+				try {
+					ret.add(Resource.buildFromMap(h.getSourceAsMap()));
+				} catch(Exception ex) {
+					context.getLogger().log("Resource ignored: " + ex.getMessage());
 				}
 			}
     	
 	        ObjectMapper objectMapper = new ObjectMapper();
 	    	
-//			reply = objectMapper.writeValueAsString(searchResult);
-			reply = objectMapper.writeValueAsString(new ArrayList<Resource>());
+			reply = objectMapper.writeValueAsString(ret);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
