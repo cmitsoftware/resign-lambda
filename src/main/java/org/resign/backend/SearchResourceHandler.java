@@ -42,8 +42,8 @@ public class SearchResourceHandler implements RequestHandler<ApiGatewayRequest, 
     	String[] tags = null;
     	String area1 = null;
     	String area2 = null;
-    	Integer start = null;
-    	Integer length = null;
+    	Integer start = 0;
+    	Integer length = 10;
     	String order = null;
     	String dir = null;
     	if(request.getQueryStringParameters() != null) {
@@ -179,8 +179,8 @@ public class SearchResourceHandler implements RequestHandler<ApiGatewayRequest, 
     		 * Full text search on text fields
     		 */
     		QueryStringQueryBuilder fullTextQuery = QueryBuilders.queryStringQuery(search + "*");
-    		fullTextQuery.field(Resource.NAME);
-    		fullTextQuery.field(Resource.SURNAME);
+    		fullTextQuery.field(Resource.NAME, (float)2.0);
+    		fullTextQuery.field(Resource.SURNAME, (float)2.0);
     		fullTextQuery.field(Resource.DESC);
     		fullTextQuery.field(Resource.LOCATION + "." + Resource.ADMINISTRATIVE_AREA_1);
     		fullTextQuery.field(Resource.LOCATION + "." + Resource.ADMINISTRATIVE_AREA_2);
@@ -243,7 +243,9 @@ public class SearchResourceHandler implements RequestHandler<ApiGatewayRequest, 
     	SearchRequest searchRequest = new SearchRequest(); 
     	SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder(); 
     	searchSourceBuilder.query(mainQuery);
-    	searchSourceBuilder.sort(order, SortOrder.fromString(dir));
+    	if(!StringUtils.isNullOrEmpty(order)) {
+    		searchSourceBuilder.sort(order, SortOrder.fromString(dir));
+    	}
     	searchSourceBuilder.from(start);
     	searchSourceBuilder.size(length);
     	searchSourceBuilder.timeout(new TimeValue(60, TimeUnit.SECONDS));
@@ -267,6 +269,7 @@ public class SearchResourceHandler implements RequestHandler<ApiGatewayRequest, 
 	        ObjectMapper objectMapper = new ObjectMapper();
 	    	
 			reply = objectMapper.writeValueAsString(ret);
+			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

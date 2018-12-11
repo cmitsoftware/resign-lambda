@@ -1,20 +1,16 @@
 package org.resign.backend.domain;
 
-import java.text.ParseException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.elasticsearch.search.SearchHit;
 import org.resign.backend.Constants;
 
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBAttribute;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBHashKey;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBRangeKey;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTable;
-import com.amazonaws.services.dynamodbv2.model.AttributeValue;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 @DynamoDBTable(tableName = "resource")
@@ -143,6 +139,22 @@ public class Resource extends ApiResponse{
 			}
 		}
 		r.setTags(tags);
+		
+		List<Image> images = new ArrayList<Image>();
+		if(sourceMap.containsKey(IMAGES)) {
+			ArrayList<HashMap<String, Object>> tagList = (ArrayList<HashMap<String, Object>>)sourceMap.get(IMAGES);
+			for(HashMap<String, Object> t: tagList) {
+				if(t.containsKey(IMAGE_URL)) {
+					Image image = new Image();
+					image.setUrl((String)t.get(IMAGE_URL));
+					if(t.containsKey(IMAGE_DESC)) {
+						image.setName((String)t.get(IMAGE_DESC));
+					}
+					images.add(image);
+				}
+			}
+		}
+		r.setImages(images);
 		
 		return r;
 	}
