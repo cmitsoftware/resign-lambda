@@ -19,7 +19,7 @@ public class Location {
 	private Double lat;
 	
 	@JsonInclude(JsonInclude.Include.NON_NULL)
-	private Double lng;
+	private Double lon;
 	
 	public String getCountry() {
 		return country;
@@ -45,10 +45,10 @@ public class Location {
 	public void setLat(Double lat) {
 		this.lat = lat;
 	}
-	public Double getLng() {
-		return lng;
+	public Double getLon() {
+		return lon;
 	}
-	public void setLng(Double lng) {
-		this.lng = lng;
+	public void setLon(Double lon) {
+		this.lon = lon;
 	}
 }

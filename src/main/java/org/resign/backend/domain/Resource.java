@@ -11,6 +11,8 @@ import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBAttribute;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBHashKey;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBRangeKey;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTable;
+import com.amazonaws.util.CollectionUtils;
+import com.amazonaws.util.StringUtils;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 @DynamoDBTable(tableName = "resource")
@@ -33,6 +35,8 @@ public class Resource extends ApiResponse{
 	public static final String VISIBLE_FROM = "visibleFrom";
 	public static final String VISIBLE_TO = "visibleTo";
 	public static final String ACTIVATION = "activation";
+	public static final String VIEWS = "views";
+	public static final String LIKES = "likes";
 	public static final String TAGS = "tags";
 	public static final String TAG_UUID= "uuid";
 	public static final String TAG_NAME = "name";
@@ -79,12 +83,94 @@ public class Resource extends ApiResponse{
     private String activation;
 	
 	@JsonInclude(JsonInclude.Include.NON_NULL)
+	private Integer views;
+	
+	@JsonInclude(JsonInclude.Include.NON_NULL)
+	private Integer likes;
+	
+	@JsonInclude(JsonInclude.Include.NON_NULL)
 	private List<Tag> tags;
 	
 	@JsonInclude(JsonInclude.Include.NON_NULL)
 	private List<Image> images;
 	
 	public Resource() {}
+	
+	public static Map buildMap(Resource r) throws Exception {
+		
+		Map<String, Object> m = new HashMap<String, Object>();
+		m.put(Resource.USER_ID, r.getUserId());
+		m.put(Resource.TS, r.getTs());
+		if(!StringUtils.isNullOrEmpty(r.getName())) {
+			m.put(Resource.NAME, r.getName());
+		}
+		if(!StringUtils.isNullOrEmpty(r.getSurname())) {
+			m.put(Resource.SURNAME, r.getSurname());
+		}
+		if(!StringUtils.isNullOrEmpty(r.getDesc())) {
+			m.put(Resource.DESC, r.getDesc());
+		}
+		if(r.getType() != null) {
+			m.put(Resource.TYPE, r.getType());
+		}
+		if(r.getResStatus() != null) {
+			m.put(Resource.RES_STATUS, r.getResStatus());
+		}
+		if(r.getVisibleFrom() != null) {
+			m.put(Resource.VISIBLE_FROM, r.getVisibleFrom());
+		}
+		if(r.getVisibleTo() != null) {
+			m.put(Resource.VISIBLE_TO, r.getVisibleTo());
+		}
+		if(r.getViews() != null) {
+			m.put(Resource.VIEWS, r.getViews());
+		}
+		if(r.getLikes() != null) {
+			m.put(Resource.LIKES, r.getLikes());
+		}
+		
+		if(r.getLocation() != null) {
+			Map<String, Object> locationMap = new HashMap<String, Object>();
+			if(!StringUtils.isNullOrEmpty(r.getLocation().getCountry())) {
+				locationMap.put(Resource.COUNTRY, r.getLocation().getCountry());
+			}
+			if(!StringUtils.isNullOrEmpty(r.getLocation().getAdministrative_area_1())) {
+				locationMap.put(Resource.ADMINISTRATIVE_AREA_1, r.getLocation().getAdministrative_area_1());
+			}
+			if(!StringUtils.isNullOrEmpty(r.getLocation().getCountry())) {
+				locationMap.put(Resource.ADMINISTRATIVE_AREA_2, r.getLocation().getAdministrative_area_2());
+			}
+			if(r.getLocation().getLat() != null) {
+				m.put(Resource.LAT, r.getLocation().getLat());
+			}
+			if(r.getLocation().getLon() != null) {
+				m.put(Resource.LON, r.getLocation().getLon());
+			}
+		}
+		if(!CollectionUtils.isNullOrEmpty(r.getTags())) {
+			ArrayList<HashMap<String, Object>> tagList = new ArrayList<HashMap<String, Object>>();
+			for(Tag t: r.getTags()) {
+				HashMap<String, Object> tag = new HashMap<String, Object>();
+				tag.put(TAG_UUID, t.getUuid());
+				tag.put(TAG_NAME, t.getName());
+				tagList.add(tag);
+			}
+			m.put(TAGS, tagList);
+		}
+		
+		if(!CollectionUtils.isNullOrEmpty(r.getImages())) {
+			ArrayList<HashMap<String, Object>> imagesList = new ArrayList<HashMap<String, Object>>();
+			for(Image i: r.getImages()) {
+				HashMap<String, Object> image = new HashMap<String, Object>();
+				image.put(IMAGE_URL, i.getUrl());
+				image.put(IMAGE_DESC, i.getDesc());
+				imagesList.add(image);
+			}
+			m.put(IMAGES, imagesList);
+		}
+		
+		return m;
+	}
 	
 	@SuppressWarnings("unchecked")
 	public static Resource buildFromMap(Map<String, Object> sourceMap) throws Exception {
@@ -121,7 +207,7 @@ public class Resource extends ApiResponse{
 			HashMap<String, Object> geoLocationMap = (HashMap<String, Object>)sourceMap.get(GEO_LOCATION);
 			if(geoLocationMap.containsKey(LAT) && geoLocationMap.containsKey(LON)) {
 				location.setLat((Double)geoLocationMap.get(LAT));
-				location.setLng((Double)geoLocationMap.get(LON));
+				location.setLon((Double)geoLocationMap.get(LON));
 			}
 		}
 		r.setLocation(location);
@@ -148,7 +234,7 @@ public class Resource extends ApiResponse{
 					Image image = new Image();
 					image.setUrl((String)t.get(IMAGE_URL));
 					if(t.containsKey(IMAGE_DESC)) {
-						image.setName((String)t.get(IMAGE_DESC));
+						image.setDesc((String)t.get(IMAGE_DESC));
 					}
 					images.add(image);
 				}
@@ -274,6 +360,24 @@ public class Resource extends ApiResponse{
 
 	public void setActivation(String activation) {
 		this.activation = activation;
+	}
+	
+	@DynamoDBAttribute
+	public Integer getViews() {
+		return views;
+	}
+
+	public void setViews(Integer views) {
+		this.views = views;
+	}
+
+	@DynamoDBAttribute
+	public Integer getLikes() {
+		return likes;
+	}
+
+	public void setLikes(Integer likes) {
+		this.likes = likes;
 	}
 
 	@DynamoDBAttribute

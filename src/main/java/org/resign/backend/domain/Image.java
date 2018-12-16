@@ -10,7 +10,7 @@ public class Image extends ApiResponse {
 	@JsonInclude(JsonInclude.Include.NON_NULL)
 	private String url;
 	@JsonInclude(JsonInclude.Include.NON_NULL)
-	private String name;
+	private String desc;
 	
 	public Image() {}
 
@@ -24,15 +24,16 @@ public class Image extends ApiResponse {
 	}
 
 	@DynamoDBAttribute
-	public String getName() {
-		return name;
+	public String getDesc() {
+		return desc;
 	}
-	public void setName(String name) {
-		this.name = name;
+
+	public void setDesc(String desc) {
+		this.desc = desc;
 	}
 
 	@Override
 	public String toString() {
-		return "Image [url=" + url + ", name=" + name + "]";
+		return "Image [url=" + url + ", desc=" + desc + "]";
 	}
 }

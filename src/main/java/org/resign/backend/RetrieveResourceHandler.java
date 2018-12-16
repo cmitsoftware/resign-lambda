@@ -7,6 +7,7 @@ import org.resign.backend.gateway.ApiGatewayRequest;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBAttribute;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
@@ -35,10 +36,24 @@ public class RetrieveResourceHandler implements RequestHandler<ApiGatewayRequest
     				.build();
     		DynamoDBMapper mapper = new DynamoDBMapper(ddb);
     		ret = mapper.load(Resource.class, userId, ts);
+    		
     		if(ret == null) {
     			ret = new Resource();
         		ret.setError("Resource not found");
     		}
+    		
+    		/*
+    		 * TODO
+    		 * Trace access (add a record to trace the access of the user and add one to the views count)
+    		 */
+    		Integer views = ret.getViews();
+    		if(views == null) {
+    			views = 0;
+    		}
+    		views++;
+    		ret.setViews(views);
+    		mapper.save(ret);
+    		
     	} else {
     		ret = new Resource();
     		ret.setError("Missing input parameters");

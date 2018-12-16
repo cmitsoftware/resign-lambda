@@ -39,23 +39,29 @@ public class DynamoDbStreamReader implements RequestHandler<DynamodbEvent, Integ
     		DynamoDBMapper mapper = new DynamoDBMapper(ddb);
     		Resource r= mapper.marshallIntoObject(Resource.class, record.getDynamodb().getNewImage());
 
-            Map<String, Object> documentMapper = objectMapper.convertValue(r, Map.class);
-            for(String s: documentMapper.keySet()) {
-            	context.getLogger().log(s + ": " + documentMapper.get(s));
-            }
-            
-            context.getLogger().log("Creating indexing request");
-            IndexRequest indexRequest = new IndexRequest("resources", "res", r.getUserId() + "-" + r.getTs())
-                    .source(documentMapper);
-
-            try {
+//            Map<String, Object> documentMapper = objectMapper.convertValue(r, Map.class);
+//            for(String s: documentMapper.keySet()) {
+//            	context.getLogger().log(s + ": " + documentMapper.get(s));
+//            }
+			try {
+    			 
+	    		Map<String, Object> resourceMap = Resource.buildMap(r);
+	    		for(String s: resourceMap.keySet()) {
+	    			context.getLogger().log(s + ": " + resourceMap.get(s));
+	    		}
+	    		
+	            context.getLogger().log("Creating indexing request");
+	            IndexRequest indexRequest = new IndexRequest("resources", "res", r.getUserId() + "-" + r.getTs())
+	                    .source(resourceMap);
+           
 				IndexResponse indexResponse = client.index(indexRequest);
-			} catch (IOException e) {
+				context.getLogger().log("Indexing performed");
+				
+			} catch (Exception e) {
 				context.getLogger().log("ERROR: " + e.getMessage());
 				e.printStackTrace();
 			}
             
-            context.getLogger().log("Indexing performed");
         }
         return event.getRecords().size();
     }

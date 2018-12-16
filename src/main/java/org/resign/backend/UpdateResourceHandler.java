@@ -46,7 +46,7 @@ public class UpdateResourceHandler implements RequestHandler<ApiGatewayRequest, 
 		    	} else {
 		    		resource = new Resource();
 		    		resource.setError("Missing input parameters");
-		    		 response = new ApiGatewayProxyResponse(500, null, objectMapper.writeValueAsString(resource));
+	    			response = new ApiGatewayProxyResponse(500, null, objectMapper.writeValueAsString(resource));
 		    	}
     		} else {
 	    		resource = new Resource();
