@@ -14,6 +14,8 @@ public class Tag extends ApiResponse {
 	private String category;
 	@JsonInclude(JsonInclude.Include.NON_NULL)
 	private String name;
+	@JsonInclude(JsonInclude.Include.NON_NULL)
+	private Integer tagStatus;
 	
 	public Tag() {}
 	
@@ -37,6 +39,13 @@ public class Tag extends ApiResponse {
 	}
 	public void setName(String name) {
 		this.name = name;
+	}
+	@DynamoDBAttribute
+	public Integer getTagStatus() {
+		return tagStatus;
+	}
+	public void setTagStatus(Integer tagStatus) {
+		this.tagStatus = tagStatus;
 	}
 
 	@Override

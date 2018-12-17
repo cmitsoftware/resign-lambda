@@ -1,6 +1,5 @@
 package org.resign.backend.es;
 
-import java.io.IOException;
 import java.util.Map;
 
 import org.apache.http.HttpHost;
@@ -22,7 +21,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class DynamoDbStreamReader implements RequestHandler<DynamodbEvent, Integer> {
 
-    @Override
+    @SuppressWarnings("unchecked")
+	@Override
     public Integer handleRequest(DynamodbEvent event, Context context) {
     	
         context.getLogger().log("Received event: " + event);
@@ -55,7 +55,7 @@ public class DynamoDbStreamReader implements RequestHandler<DynamodbEvent, Integ
 	                    .source(resourceMap);
            
 				IndexResponse indexResponse = client.index(indexRequest);
-				context.getLogger().log("Indexing performed");
+				context.getLogger().log("Indexing performed: " + indexResponse.toString());
 				
 			} catch (Exception e) {
 				context.getLogger().log("ERROR: " + e.getMessage());

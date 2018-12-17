@@ -16,7 +16,7 @@ import com.amazonaws.util.StringUtils;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 @DynamoDBTable(tableName = "resource")
-public class Resource extends ApiResponse{
+public class Resource extends ApiResponse {
 	
 	public static final String USER_ID = "userId";
 	public static final String TS = "ts";
