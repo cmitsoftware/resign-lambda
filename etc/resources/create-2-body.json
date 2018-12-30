@@ -1,0 +1,22 @@
+//curl -X POST "https://ub5i5suju2.execute-api.eu-west-3.amazonaws.com/beta/resources" -H 'Content-Type: application/json' -d'
+{
+	"userId":"",
+	"type":1,
+	"name":"Letto armadio",
+	"surname":"surname 1",
+	"desc":"Un letto che è anche un armadio",
+	"resStatus":2,
+	"location":{
+		"administrative_area_1":"Lombardia",
+		"administrative_area_2":"Varese",
+		"country":"Italia"
+	},
+	"geoLocation":{
+		"lat":45.8413278,
+		"lon":-8.7927409
+	},
+	"tags":[
+		{"uuid":"086bcc21-31b5-4d6c-a43c-f4c0078e339e","name":"Legno"},
+		{"uuid":"e8f10c34-4a5f-44df-b945-37873184a21","name":"Do it yourself"}
+	]
+}

@@ -21,7 +21,7 @@ public class CreateResourceHandler implements RequestHandler<ApiGatewayRequest, 
 		
 		context.getLogger().log("Request: " + request.toString());
 		ObjectMapper objectMapper = new ObjectMapper();
-
+//		context.getIdentity().
     	String ts = Constants.ddbFullDateFormat.format(new Date());
     	Resource resource = null;
     	ApiGatewayProxyResponse response;

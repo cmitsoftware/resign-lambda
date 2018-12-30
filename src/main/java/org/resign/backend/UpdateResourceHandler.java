@@ -39,7 +39,7 @@ public class UpdateResourceHandler implements RequestHandler<ApiGatewayRequest, 
 		    		} catch (Exception e) {
 		    			context.getLogger().log("Error: " + e.getMessage());
 		    			resource = new Resource();
-		    		    resource.setError("An error occurred while creating the resource");
+		    		    resource.setError("An error occurred while updating the resource");
 		    		    response = new ApiGatewayProxyResponse(500, null, objectMapper.writeValueAsString(resource));
 		    		}
 		    		
@@ -56,9 +56,9 @@ public class UpdateResourceHandler implements RequestHandler<ApiGatewayRequest, 
     	} catch (Exception e) {
     		context.getLogger().log("Error: " + e.getMessage());
     		resource = new Resource();
-		    resource.setError("An error occurred while creating the resource");
+		    resource.setError("An error occurred while updating the resource");
 		    response = new ApiGatewayProxyResponse(500, null, "{\"error\":\"" 
-		    		+ "An error occurred while creating the resource" + "\"}");
+		    		+ "An error occurred while updating the resource" + "\"}");
     	}
     	return response;
     }

@@ -48,6 +48,10 @@ public class Resource extends ApiResponse {
 	public static final Integer STATUS_CONFIRMED = 2;
 	public static final Integer STATUS_REJECTED = 3;
 	public static final Integer STATUS_DELETED = 4;
+	
+	public static final Integer ITEM = 1;
+	public static final Integer PERSON = 2;
+	public static final Integer IDEA = 3;
 
 	@JsonInclude(JsonInclude.Include.NON_NULL)
 	private String userId;
