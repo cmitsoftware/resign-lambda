@@ -1,0 +1,36 @@
+{
+	"userId":"2cee43c3-e107-4eef-93ea-f9e88da4d28b",
+	"ts":"20181231121812",
+	"type":1,
+	"name":"Persiane in legno verniciato",
+	"desc":"4 coppie di persiane di vari colori, provenienti da vecchia villa. Riverniciate come nuove",
+	"resStatus":2,
+	"location":{
+		"administrative_area_1":"Lombardia",
+		"administrative_area_2":"Como",
+		"country":"Italia",
+		"lat":45.8413277,
+		"lon":-8.7927409
+	},
+	"images":[
+		{
+			"url":"2cee43c3-e107-4eef-93ea-f9e88da4d28b/20181231121812/persiane.jpg",
+			"desc": "Tutte le persiane"
+		},
+		{
+			"url":"2cee43c3-e107-4eef-93ea-f9e88da4d28b/20181231121812/persiane-1.jpg"
+		},
+		{
+			"url":"2cee43c3-e107-4eef-93ea-f9e88da4d28b/20181231121812/persiane-2.jpg"
+		},
+		{
+			"url":"2cee43c3-e107-4eef-93ea-f9e88da4d28b/20181231121812/persiane-3.jpg"
+		},
+		{
+			"url":"2cee43c3-e107-4eef-93ea-f9e88da4d28b/20181231121812/persiane-4.jpg"
+		}
+	],
+	"tags":[
+		{"uuid":"086bcc21-31b5-4d6c-a43c-f4c0078e339e","name":"Legno"}
+	]
+}
