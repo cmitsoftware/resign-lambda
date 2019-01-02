@@ -1,0 +1,37 @@
+{
+	"userId":"a9c5db26-5b6e-467c-bf20-7c7fb2e83f84",
+	"ts":"20181231121812",
+	"type":1,
+	"name":"Piastrelle di cotto",
+	"desc":"Piastrelle di cotto quadrate, 40x40 cm",
+	"resStatus":2,
+	"location":{
+		"administrative_area_1":"Lazio",
+		"administrative_area_2":"Tivoli",
+		"country":"Italia",
+		"lat":45.8413277,
+		"lon":-8.7927409
+	},
+	"images":[
+		{
+			"url":"2cee43c3-e107-4eef-93ea-f9e88da4d28b/20181231121812/persiane.jpg",
+			"desc": "Tutte le persiane"
+		},
+		{
+			"url":"2cee43c3-e107-4eef-93ea-f9e88da4d28b/20181231121812/persiane-1.jpg"
+		},
+		{
+			"url":"2cee43c3-e107-4eef-93ea-f9e88da4d28b/20181231121812/persiane-2.jpg"
+		},
+		{
+			"url":"2cee43c3-e107-4eef-93ea-f9e88da4d28b/20181231121812/persiane-3.jpg"
+		},
+		{
+			"url":"2cee43c3-e107-4eef-93ea-f9e88da4d28b/20181231121812/persiane-4.jpg"
+		}
+	],
+	"tags":[
+		{"uuid":"8f464461-4f8a-41d4-aea5-cdc930b73403","name":"Terracotta"},
+		{"uuid":"550801d3-0a25-42d3-a056-674855d8184a","name":"Piastrelle"}
+	]
+}

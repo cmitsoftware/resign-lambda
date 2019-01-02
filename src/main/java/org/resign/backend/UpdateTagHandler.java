@@ -57,7 +57,7 @@ public class UpdateTagHandler implements RequestHandler<ApiGatewayRequest, ApiGa
     		tag = new Tag();
 		    tag.setError("An error occurred while updating the tag");
 		    response = new ApiGatewayProxyResponse(500, null, "{\"error\":\"" 
-		    		+ "An error occurred while creating the resource" + "\"}");
+		    		+ "An error occurred while updating the tag" + "\"}");
     	}
     	return response;
     }

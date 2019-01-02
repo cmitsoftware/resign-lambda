@@ -1,0 +1,36 @@
+{
+	"userId":"e6a13245-f92e-4eba-b474-6000dbd0ebc7",
+	"ts":"20181231121812",
+	"type":1,
+	"name":"Tegole",
+	"desc":"Tegole marsigliesi in terracotta. 2 tonnellate",
+	"resStatus":2,
+	"location":{
+		"administrative_area_1":"Piemonte",
+		"administrative_area_2":"Verbania",
+		"country":"Italia",
+		"lat":45.8413277,
+		"lon":-8.7927409
+	},
+	"images":[
+		{
+			"url":"2cee43c3-e107-4eef-93ea-f9e88da4d28b/20181231121812/persiane.jpg",
+			"desc": "Tutte le persiane"
+		},
+		{
+			"url":"2cee43c3-e107-4eef-93ea-f9e88da4d28b/20181231121812/persiane-1.jpg"
+		},
+		{
+			"url":"2cee43c3-e107-4eef-93ea-f9e88da4d28b/20181231121812/persiane-2.jpg"
+		},
+		{
+			"url":"2cee43c3-e107-4eef-93ea-f9e88da4d28b/20181231121812/persiane-3.jpg"
+		},
+		{
+			"url":"2cee43c3-e107-4eef-93ea-f9e88da4d28b/20181231121812/persiane-4.jpg"
+		}
+	],
+	"tags":[
+		{"uuid":"8f464461-4f8a-41d4-aea5-cdc930b73403","name":"Terracotta"}
+	]
+}
