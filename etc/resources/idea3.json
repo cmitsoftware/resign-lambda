@@ -2,8 +2,8 @@
 	"userId":"a9c5db26-5b6e-467c-bf20-7c7fb2e83f84",
 	"ts":"20190102101920",
 	"type":3,
-	"name":"Panchina di libri",
-	"desc":"Panchina costituita interamente di libri",
+	"name":"Poltrona di libri",
+	"desc":"Poltrona costituita interamente da libri",
 	"resStatus":2,
 	"location":{
 		"administrative_area_1":"Lazio",
