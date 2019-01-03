@@ -104,7 +104,7 @@ public class Resource extends ApiResponse {
 		
 		Map<String, Object> m = new HashMap<String, Object>();
 		m.put(Resource.USER_ID, r.getUserId());
-		m.put(Resource.TS, r.getTs());
+		m.put(Resource.TS, Constants.esFullDateFormat.format(Constants.ddbFullDateFormat.parse(r.getTs())));
 		if(!StringUtils.isNullOrEmpty(r.getName())) {
 			m.put(Resource.NAME, r.getName());
 		}
@@ -121,10 +121,10 @@ public class Resource extends ApiResponse {
 			m.put(Resource.RES_STATUS, r.getResStatus());
 		}
 		if(r.getVisibleFrom() != null) {
-			m.put(Resource.VISIBLE_FROM, r.getVisibleFrom());
+			m.put(Resource.VISIBLE_FROM, Constants.esFullDateFormat.format(Constants.ddbFullDateFormat.parse(r.getVisibleFrom())));
 		}
 		if(r.getVisibleTo() != null) {
-			m.put(Resource.VISIBLE_TO, r.getVisibleTo());
+			m.put(Resource.VISIBLE_TO, Constants.esFullDateFormat.format(Constants.ddbFullDateFormat.parse(r.getVisibleTo())));
 		}
 		if(r.getViews() != null) {
 			m.put(Resource.VIEWS, r.getViews());
