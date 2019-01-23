@@ -20,6 +20,7 @@ public class RetrieveResourceHandler implements RequestHandler<ApiGatewayRequest
     public ApiGatewayProxyResponse handleRequest(ApiGatewayRequest request, Context context) {
     	
     	context.getLogger().log("Request: " + request.toString());
+		context.getLogger().log("Identity id: " + context.getIdentity().getIdentityId());
     	
     	String userId = null;
     	String ts = null;
