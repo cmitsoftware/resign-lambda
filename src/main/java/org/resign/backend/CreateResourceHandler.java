@@ -19,7 +19,12 @@ public class CreateResourceHandler implements RequestHandler<ApiGatewayRequest, 
 	@Override
 	public ApiGatewayProxyResponse handleRequest(ApiGatewayRequest request, Context context) {
 		
+//		final Map<String, Object> requestContext = (Map<String, Object>) request.getRequestContext();
+//	    final Map<String, Object> identity = (Map<String, Object>) requestContext.get("identity");
+//	    final String userId = (String) identity.get("cognitoIdentityId");
+		
 		context.getLogger().log("Request: " + request.toString());
+		
 		ObjectMapper objectMapper = new ObjectMapper();
 //		context.getIdentity().
     	String ts = Constants.ddbFullDateFormat.format(new Date());

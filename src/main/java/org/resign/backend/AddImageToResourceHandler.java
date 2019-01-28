@@ -1,14 +1,11 @@
 package org.resign.backend;
 
-import java.util.Date;
-
-import org.resign.backend.domain.Resource;
 import org.resign.backend.gateway.ApiGatewayProxyResponse;
 import org.resign.backend.gateway.ApiGatewayRequest;
 
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.amazonaws.util.Base64;
 
 public class AddImageToResourceHandler implements RequestHandler<ApiGatewayRequest, ApiGatewayProxyResponse> {
 
@@ -16,20 +13,28 @@ public class AddImageToResourceHandler implements RequestHandler<ApiGatewayReque
 	public ApiGatewayProxyResponse handleRequest(ApiGatewayRequest request, Context context) {
 		
 		context.getLogger().log("Request: " + request.toString());
-		ObjectMapper objectMapper = new ObjectMapper();
-
-    	String ts = Constants.ddbFullDateFormat.format(new Date());
-    	Resource resource = null;
-    	ApiGatewayProxyResponse response = null;
-    	if(request.getBody() != null) {
-    		try {
-				resource = objectMapper.readValue(request.getBody(), Resource.class);
-				resource.setTs(ts);
-			} catch (Exception e) {
-				context.getLogger().log("Error: " + e.getMessage());
-			}
-    	}
-    	
+		
+		context.getLogger().log("Identity id: " + context.getIdentity().getIdentityId());
+		
+		String authorizationHeader = request.getHeaders().get("Authorization");
+		String tokens[] = authorizationHeader.split(".");
+		context.getLogger().log(new String(Base64.decode(tokens[1])));
+		
+		
+//		ObjectMapper objectMapper = new ObjectMapper();
+//
+//    	String ts = Constants.ddbFullDateFormat.format(new Date());
+//    	Resource resource = null;
+//    	ApiGatewayProxyResponse response = null;
+//    	if(request.getBody() != null) {
+//    		try {
+//				resource = objectMapper.readValue(request.getBody(), Resource.class);
+//				resource.setTs(ts);
+//			} catch (Exception e) {
+//				context.getLogger().log("Error: " + e.getMessage());
+//			}
+//    	}
+		ApiGatewayProxyResponse response = new ApiGatewayProxyResponse(200, null, context.getIdentity().getIdentityId());
     	return response;
 	}
 }
