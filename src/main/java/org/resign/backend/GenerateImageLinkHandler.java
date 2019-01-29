@@ -41,18 +41,19 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 				// Set the presigned URL to expire after one hour.
 				java.util.Date expiration = new java.util.Date();
 				long expTimeMillis = expiration.getTime();
-				expTimeMillis += 1000 * 60;
+				expTimeMillis += 1000 * 60 * 10;
 				expiration.setTime(expTimeMillis);
 		
 				// Generate the presigned URL.
-				System.out.println("Generating pre-signed URL.");
 				GeneratePresignedUrlRequest generatePresignedUrlRequest = 
 						new GeneratePresignedUrlRequest(bucketName, objectKey)
-						.withMethod(HttpMethod.POST)
+//						.withContentType("multipart/form-data")
+						.withContentType("application/pdf")
+						.withMethod(HttpMethod.PUT)
 						.withExpiration(expiration);
 				URL url = s3Client.generatePresignedUrl(generatePresignedUrlRequest);
 		
-				context.getLogger().log("Pre-Signed URL: " + url.toString());
+				context.getLogger().log("Pre-Signed URL for put pdf doc: " + url.toString());
 		
 				ApiGatewayProxyResponse response = new ApiGatewayProxyResponse(200, null, url.toString());
 				return response;
