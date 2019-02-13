@@ -30,36 +30,39 @@ import org.resign.backend.gateway.ApiGatewayProxyResponse;
 			String mimeType = request.getQueryStringParameters().get("mimeType");
 			context.getLogger().log("Requested presigned url for " + objectKey);
 			
-			String checkUserAuth = System.getenv("CHECK_USER_AUTH");
-			context.getLogger().log("Check user auth " + checkUserAuth);
-			if("true".equals(checkUserAuth)) {
-				try {
-					
-					String authorizationHeader = request.getHeaders().get("Authorization");
-					String payload = new String(Base64.decode(authorizationHeader.split("\\.")[1]), "UTF-8");
-					context.getLogger().log("Payload: " + payload);
-					JSONObject json = new JSONObject(payload);
-					String sub = json.getString("sub");
-					context.getLogger().log("Sub: " + sub);
-					
-					String userBucketFolder = objectKey.split("\\/")[0];
-					context.getLogger().log("User bucket folder: " + userBucketFolder);
-					if(!userBucketFolder.equals(sub)) {
-						return new ApiGatewayProxyResponse(403, null, "Not authorized");
-					}
-					
-				} catch (Exception e) {
-					e.printStackTrace();
-					return new ApiGatewayProxyResponse(500, null, "An error occurred validating user permissions");
-				}
-			} 
-			
 			try {
-			
 				AmazonS3 s3Client = AmazonS3ClientBuilder.standard()
 	                    .withRegion(clientRegion)
 	                    .withCredentials(DefaultAWSCredentialsProviderChain.getInstance())
 	                    .build();
+			
+				String checkUserAuth = System.getenv("CHECK_USER_AUTH");
+				context.getLogger().log("Check user auth " + checkUserAuth);
+				
+				if("true".equals(checkUserAuth)) {
+					try {
+						
+						String authorizationHeader = request.getHeaders().get("Authorization");
+						context.getLogger().log("Authorization: " + authorizationHeader);
+						String token = authorizationHeader.split("\\.")[1];
+						context.getLogger().log("Token: " + token);
+						String payload = new String(Base64.decode(token), "UTF-8");
+						context.getLogger().log("Payload: " + payload);
+						JSONObject json = new JSONObject(payload);
+						String sub = json.getString("sub");
+						context.getLogger().log("Sub: " + sub);
+						
+						String userBucketFolder = objectKey.split("\\/")[0];
+						context.getLogger().log("User bucket folder: " + userBucketFolder);
+						if(!userBucketFolder.equals(sub)) {
+							return new ApiGatewayProxyResponse(403, null, "Not authorized");
+						}
+						
+					} catch (Exception e) {
+						e.printStackTrace();
+						return new ApiGatewayProxyResponse(500, null, "An error occurred validating user permissions");
+					}
+				}
 				
 				// Set the presigned URL to expire after one hour.
 				java.util.Date expiration = new java.util.Date();

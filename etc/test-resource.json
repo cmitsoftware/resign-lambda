@@ -1,0 +1,14 @@
+{
+	"type":2,
+	"name":"Michele",
+	"surname":"Cervini",
+	"desc":"Test dev",
+	"resStatus":2,
+	"location":{
+		"administrative_area_1":"Lombardia",
+		"administrative_area_2":"Varese",
+		"country":"Italia",
+		"lat":45.8413277,
+		"lon":-8.7927409
+	}
+}

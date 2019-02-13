@@ -9,7 +9,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 public class User extends ApiResponse {
 	
 	@JsonInclude(JsonInclude.Include.NON_NULL)
-	private String userId;
+	private String uuid;
 	@JsonInclude(JsonInclude.Include.NON_NULL)
 	private String email;
 	@JsonInclude(JsonInclude.Include.NON_NULL)
@@ -20,17 +20,18 @@ public class User extends ApiResponse {
 	private String surname;
 	
 	@DynamoDBHashKey
-	public String getUserId() {
-		return userId;
+	public String getUuid() {
+		return uuid;
 	}
-	public void setUserId(String userId) {
-		this.userId = userId;
+	public void setUuid(String uuid) {
+		this.uuid = uuid;
 	}
 	
 	@DynamoDBAttribute
 	public String getEmail() {
 		return email;
 	}
+	
 	public void setEmail(String email) {
 		this.email = email;
 	}
