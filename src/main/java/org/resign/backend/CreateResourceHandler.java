@@ -7,6 +7,7 @@ import org.resign.backend.domain.Resource;
 import org.resign.backend.domain.User;
 import org.resign.backend.gateway.ApiGatewayProxyResponse;
 import org.resign.backend.gateway.ApiGatewayRequest;
+import org.resign.backend.util.CognitoUtil;
 
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
@@ -53,11 +54,13 @@ public class CreateResourceHandler implements RequestHandler<ApiGatewayRequest, 
 			if("true".equals(checkUserAuth)) {
 				try {
 	
-					String authorizationHeader = request.getHeaders().get("Authorization");
-					String payload = new String(Base64.decode(authorizationHeader.split("\\.")[1]), "UTF-8");
-					context.getLogger().log("Payload: " + payload);
-					JSONObject json = new JSONObject(payload);
-					String sub = json.getString("sub");
+//					String authorizationHeader = request.getHeaders().get("Authorization");
+//					String payload = new String(Base64.decode(authorizationHeader.split("\\.")[1]), "UTF-8");
+//					context.getLogger().log("Payload: " + payload);
+//					JSONObject json = new JSONObject(payload);
+//					String sub = json.getString("sub");
+					
+					String sub = CognitoUtil.readSubFromAuthorization(request.getHeaders().get("Authorization"));
 					context.getLogger().log("Sub: " + sub);
 					
 					/*
