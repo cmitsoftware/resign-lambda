@@ -134,7 +134,6 @@ public class RetrievePostHandler implements RequestHandler<ApiGatewayRequest, Ap
     		} catch (JsonProcessingException e) {
     			e.printStackTrace();
     		}
-    		
     	}
 		
         ApiGatewayProxyResponse response = new ApiGatewayProxyResponse(200, null, reply);

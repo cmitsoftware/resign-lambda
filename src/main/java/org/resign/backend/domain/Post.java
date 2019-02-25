@@ -25,7 +25,7 @@ public class Post extends ApiResponse {
 	public static final String PS = "ps";
 	public static final String TITLE = "title";
 	public static final String TEXT = "text";
-	public static final String IMAGE = "image";
+	public static final String IMAGES = "images";
 	public static final String VIEWS = "views";
 	public static final String LIKES = "likes";
 	
@@ -45,7 +45,7 @@ public class Post extends ApiResponse {
 	@JsonInclude(JsonInclude.Include.NON_NULL)
 	private Integer likes;
 	@JsonInclude(JsonInclude.Include.NON_NULL)
-	private String image;
+	private List<String> images;
 	
 //	@SuppressWarnings("unchecked")
 //	public static Post buildFromMap(Map<String, Object> sourceMap) throws Exception {
@@ -95,8 +95,12 @@ public class Post extends ApiResponse {
 		if(sourceMap.containsKey(LIKES)) {
 			p.setLikes(Integer.parseInt(sourceMap.get(LIKES).getS()));
 		}
-		if(sourceMap.containsKey(IMAGE)) {
-			p.setImage(sourceMap.get(IMAGE).getS());
+		if(sourceMap.containsKey(IMAGES)) {
+			List<String> images = new ArrayList<String>();
+			for(AttributeValue v: sourceMap.get(IMAGES).getL()) {
+				images.add(v.getS());
+			}
+			p.setImages(images);
 		}
 		
 		return p;
@@ -166,11 +170,13 @@ public class Post extends ApiResponse {
 	}
 
 	@DynamoDBAttribute
-	public String getImage() {
-		return image;
+	public List<String> getImages() {
+		return images;
 	}
 
-	public void setImage(String image) {
-		this.image = image;
+	public void setImages(List<String> images) {
+		this.images = images;
 	}
+
+	
 }
