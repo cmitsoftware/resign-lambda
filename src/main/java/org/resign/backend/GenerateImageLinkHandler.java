@@ -1,7 +1,12 @@
 	package org.resign.backend;
 	
 	import java.net.URL;
+import java.util.ArrayList;
+import java.util.Base64;
+import java.util.List;
+import java.util.UUID;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.resign.backend.gateway.ApiGatewayProxyResponse;
 	import org.resign.backend.gateway.ApiGatewayRequest;
@@ -15,7 +20,7 @@ import org.resign.backend.gateway.ApiGatewayProxyResponse;
 	import com.amazonaws.services.s3.AmazonS3;
 	import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 	import com.amazonaws.services.s3.model.GeneratePresignedUrlRequest;
-	import com.amazonaws.util.Base64;
+//	import com.amazonaws.util.Base64;
 
 	public class GenerateImageLinkHandler implements RequestHandler<ApiGatewayRequest, ApiGatewayProxyResponse> {
 	
@@ -26,9 +31,9 @@ import org.resign.backend.gateway.ApiGatewayProxyResponse;
 			
 			String clientRegion = "eu-west-3";
 			String bucketName = "resign-test-resource-images";
-			String objectKey = request.getQueryStringParameters().get("key");
+			String bucketFolderKey = request.getQueryStringParameters().get("key");
 			String mimeType = request.getQueryStringParameters().get("mimeType");
-			context.getLogger().log("Requested presigned url for " + objectKey);
+			context.getLogger().log("Requested presigned url for " + bucketFolderKey);
 			
 			try {
 				AmazonS3 s3Client = AmazonS3ClientBuilder.standard()
@@ -46,15 +51,23 @@ import org.resign.backend.gateway.ApiGatewayProxyResponse;
 						context.getLogger().log("Authorization: " + authorizationHeader);
 						String token = authorizationHeader.split("\\.")[1];
 						context.getLogger().log("Token: " + token);
-						String payload = new String(Base64.decode(token), "UTF-8");
+						String payload = new String(Base64.getDecoder().decode(token), "UTF-8");
 						context.getLogger().log("Payload: " + payload);
 						JSONObject json = new JSONObject(payload);
 						String sub = json.getString("sub");
 						context.getLogger().log("Sub: " + sub);
+						JSONArray groups = json.optJSONArray("cognito:groups");
+						List<String> roles = new ArrayList<String>();
+						if(groups != null) {
+							groups.forEach(item -> {
+								context.getLogger().log("Group: " + (String)item);
+								roles.add((String)item);
+							});
+						}
 						
-						String userBucketFolder = objectKey.split("\\/")[0];
+						String userBucketFolder = bucketFolderKey.split("\\/")[0];
 						context.getLogger().log("User bucket folder: " + userBucketFolder);
-						if(!userBucketFolder.equals(sub)) {
+						if(!userBucketFolder.equals(sub) && !roles.contains(System.getenv("COGNITO_ADMIN_GROUP"))) {
 							return new ApiGatewayProxyResponse(403, null, "Not authorized");
 						}
 						
@@ -64,23 +77,23 @@ import org.resign.backend.gateway.ApiGatewayProxyResponse;
 					}
 				}
 				
-				// Set the presigned URL to expire after one hour.
 				java.util.Date expiration = new java.util.Date();
 				long expTimeMillis = expiration.getTime();
-				expTimeMillis += 1000 * 60 * 10;
+				Integer linkValiditySeconds = Integer.parseInt(System.getenv("LINK_VALIDITY"));
+				expTimeMillis += 1000 * linkValiditySeconds;
 				expiration.setTime(expTimeMillis);
+				
+				String imageKey = bucketFolderKey + "/" + UUID.randomUUID().toString();
 		
 				// Generate the presigned URL.
 				GeneratePresignedUrlRequest generatePresignedUrlRequest = 
-						new GeneratePresignedUrlRequest(bucketName, objectKey)
-//						.withContentType("multipart/form-data")
-//						.withContentType("application/pdf")
+						new GeneratePresignedUrlRequest(bucketName, imageKey)
 						.withContentType(mimeType)
 						.withMethod(HttpMethod.PUT)
 						.withExpiration(expiration);
 				URL url = s3Client.generatePresignedUrl(generatePresignedUrlRequest);
 		
-				context.getLogger().log("Pre-Signed URL for image: " + url.toString());
+				context.getLogger().log("Pre-Signed URL : " + url.toString());
 		
 				ApiGatewayProxyResponse response = new ApiGatewayProxyResponse(200, null, url.toString());
 				return response;
