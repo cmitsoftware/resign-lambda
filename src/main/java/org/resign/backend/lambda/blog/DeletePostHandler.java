@@ -1,6 +1,6 @@
-package org.resign.backend;
+package org.resign.backend.lambda.blog;
 
-import org.resign.backend.domain.Resource;
+import org.resign.backend.domain.Post;
 import org.resign.backend.gateway.ApiGatewayProxyResponse;
 import org.resign.backend.gateway.ApiGatewayRequest;
 
@@ -13,7 +13,7 @@ import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.amazonaws.util.StringUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-public class UpdateResourceHandler implements RequestHandler<ApiGatewayRequest, ApiGatewayProxyResponse> {
+public class DeletePostHandler implements RequestHandler<ApiGatewayRequest, ApiGatewayProxyResponse> {
 
     @Override
     public ApiGatewayProxyResponse handleRequest(ApiGatewayRequest request, Context context) {
@@ -21,45 +21,48 @@ public class UpdateResourceHandler implements RequestHandler<ApiGatewayRequest, 
     	context.getLogger().log("Request: " + request.toString());
 		ObjectMapper objectMapper = new ObjectMapper();
 
-    	Resource resource = null;
+    	Post post = null;
     	ApiGatewayProxyResponse response;
     	try {
-    		if(request.getBody() != null) {
-				resource = objectMapper.readValue(request.getBody(), Resource.class);
-		    	if(!StringUtils.isNullOrEmpty(resource.getUserId()) 
-		    			&& !StringUtils.isNullOrEmpty(resource.getTs())) {
+    		if(request.getQueryStringParameters() != null) {
+//				post = objectMapper.readValue(request.getBody(), Post.class);
+    			String userId = request.getQueryStringParameters().get("userId");
+    			String ts = request.getQueryStringParameters().get("ts");
+		    	if(!StringUtils.isNullOrEmpty(userId) && !StringUtils.isNullOrEmpty(ts)) {
 		    		try {
 		    			AmazonDynamoDB ddb = AmazonDynamoDBClientBuilder.standard()
 			    				.withRegion(Regions.EU_WEST_3)
 			    				.build();
 			    		DynamoDBMapper mapper = new DynamoDBMapper(ddb);
-			    		mapper.save(resource);
-		    			response = new ApiGatewayProxyResponse(200, null, objectMapper.writeValueAsString(resource));
+			    		post = mapper.load(Post.class, userId, ts);
+			    		mapper.delete(post);
+		    			response = new ApiGatewayProxyResponse(200, null, null);
 		    			
 		    		} catch (Exception e) {
 		    			context.getLogger().log("Error: " + e.getMessage());
-		    			resource = new Resource();
-		    		    resource.setError("An error occurred while updating the resource");
-		    		    response = new ApiGatewayProxyResponse(500, null, objectMapper.writeValueAsString(resource));
+		    			post = new Post();
+		    		    post.setError("An error occurred while deleting the post");
+		    		    response = new ApiGatewayProxyResponse(500, null, objectMapper.writeValueAsString(post));
 		    		}
 		    		
 		    	} else {
-		    		resource = new Resource();
-		    		resource.setError("Missing input parameters");
-	    			response = new ApiGatewayProxyResponse(500, null, objectMapper.writeValueAsString(resource));
+		    		post = new Post();
+		    		post.setError("Missing input parameters");
+	    			response = new ApiGatewayProxyResponse(500, null, objectMapper.writeValueAsString(post));
 		    	}
     		} else {
-	    		resource = new Resource();
-	    		resource.setError("Missing input parameters");
-	    		 response = new ApiGatewayProxyResponse(500, null, objectMapper.writeValueAsString(resource));
+	    		post = new Post();
+	    		post.setError("Missing input parameters");
+	    		 response = new ApiGatewayProxyResponse(500, null, objectMapper.writeValueAsString(post));
 	    	}
     	} catch (Exception e) {
     		context.getLogger().log("Error: " + e.getMessage());
-    		resource = new Resource();
-		    resource.setError("An error occurred while updating the resource");
+//    		post = new Post();
+//		    post.setError("An error occurred while updating the tag");
 		    response = new ApiGatewayProxyResponse(500, null, "{\"error\":\"" 
-		    		+ "An error occurred while updating the resource" + "\"}");
+		    		+ "An error occurred while deleting the tag" + "\"}");
     	}
     	return response;
     }
+
 }

@@ -7,6 +7,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.resign.backend.gateway.ApiGatewayProxyResponse;
 import org.resign.backend.gateway.ApiGatewayRequest;
+import org.resign.backend.lambda.resource.SearchResourceHandler;
 
 import com.amazonaws.services.lambda.runtime.Context;
 

@@ -1,8 +1,9 @@
-package org.resign.backend;
+package org.resign.backend.lambda.blog;
 
 import java.util.Date;
 import java.util.UUID;
 
+import org.resign.backend.Constants;
 import org.resign.backend.domain.Post;
 import org.resign.backend.gateway.ApiGatewayProxyResponse;
 import org.resign.backend.gateway.ApiGatewayRequest;

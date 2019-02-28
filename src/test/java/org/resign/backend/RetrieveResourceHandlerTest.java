@@ -5,11 +5,11 @@ import java.io.IOException;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.resign.backend.RetrieveResourceHandler;
 import org.resign.backend.domain.Resource;
 import org.resign.backend.domain.TestContext;
 import org.resign.backend.gateway.ApiGatewayProxyResponse;
 import org.resign.backend.gateway.ApiGatewayRequest;
+import org.resign.backend.lambda.resource.RetrieveResourceHandler;
 
 import com.amazonaws.services.lambda.runtime.Context;
 

@@ -1,6 +1,6 @@
-package org.resign.backend;
+package org.resign.backend.lambda.resource;
 
-import org.resign.backend.domain.Tag;
+import org.resign.backend.domain.Resource;
 import org.resign.backend.gateway.ApiGatewayProxyResponse;
 import org.resign.backend.gateway.ApiGatewayRequest;
 
@@ -13,7 +13,7 @@ import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.amazonaws.util.StringUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-public class UpdateTagHandler implements RequestHandler<ApiGatewayRequest, ApiGatewayProxyResponse> {
+public class UpdateResourceHandler implements RequestHandler<ApiGatewayRequest, ApiGatewayProxyResponse> {
 
     @Override
     public ApiGatewayProxyResponse handleRequest(ApiGatewayRequest request, Context context) {
@@ -21,43 +21,44 @@ public class UpdateTagHandler implements RequestHandler<ApiGatewayRequest, ApiGa
     	context.getLogger().log("Request: " + request.toString());
 		ObjectMapper objectMapper = new ObjectMapper();
 
-    	Tag tag = null;
+    	Resource resource = null;
     	ApiGatewayProxyResponse response;
     	try {
     		if(request.getBody() != null) {
-				tag = objectMapper.readValue(request.getBody(), Tag.class);
-		    	if(!StringUtils.isNullOrEmpty(tag.getUuid())) {
+				resource = objectMapper.readValue(request.getBody(), Resource.class);
+		    	if(!StringUtils.isNullOrEmpty(resource.getUserId()) 
+		    			&& !StringUtils.isNullOrEmpty(resource.getTs())) {
 		    		try {
 		    			AmazonDynamoDB ddb = AmazonDynamoDBClientBuilder.standard()
 			    				.withRegion(Regions.EU_WEST_3)
 			    				.build();
 			    		DynamoDBMapper mapper = new DynamoDBMapper(ddb);
-			    		mapper.save(tag);
-		    			response = new ApiGatewayProxyResponse(200, null, objectMapper.writeValueAsString(tag));
+			    		mapper.save(resource);
+		    			response = new ApiGatewayProxyResponse(200, null, objectMapper.writeValueAsString(resource));
 		    			
 		    		} catch (Exception e) {
 		    			context.getLogger().log("Error: " + e.getMessage());
-		    			tag = new Tag();
-		    		    tag.setError("An error occurred while updating the tag");
-		    		    response = new ApiGatewayProxyResponse(500, null, objectMapper.writeValueAsString(tag));
+		    			resource = new Resource();
+		    		    resource.setError("An error occurred while updating the resource");
+		    		    response = new ApiGatewayProxyResponse(500, null, objectMapper.writeValueAsString(resource));
 		    		}
 		    		
 		    	} else {
-		    		tag = new Tag();
-		    		tag.setError("Missing input parameters");
-	    			response = new ApiGatewayProxyResponse(500, null, objectMapper.writeValueAsString(tag));
+		    		resource = new Resource();
+		    		resource.setError("Missing input parameters");
+	    			response = new ApiGatewayProxyResponse(500, null, objectMapper.writeValueAsString(resource));
 		    	}
     		} else {
-	    		tag = new Tag();
-	    		tag.setError("Missing input parameters");
-	    		 response = new ApiGatewayProxyResponse(500, null, objectMapper.writeValueAsString(tag));
+	    		resource = new Resource();
+	    		resource.setError("Missing input parameters");
+	    		 response = new ApiGatewayProxyResponse(500, null, objectMapper.writeValueAsString(resource));
 	    	}
     	} catch (Exception e) {
     		context.getLogger().log("Error: " + e.getMessage());
-    		tag = new Tag();
-		    tag.setError("An error occurred while updating the tag");
+    		resource = new Resource();
+		    resource.setError("An error occurred while updating the resource");
 		    response = new ApiGatewayProxyResponse(500, null, "{\"error\":\"" 
-		    		+ "An error occurred while updating the tag" + "\"}");
+		    		+ "An error occurred while updating the resource" + "\"}");
     	}
     	return response;
     }

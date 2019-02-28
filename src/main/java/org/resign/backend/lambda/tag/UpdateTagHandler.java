@@ -1,6 +1,6 @@
-package org.resign.backend;
+package org.resign.backend.lambda.tag;
 
-import org.resign.backend.domain.Post;
+import org.resign.backend.domain.Tag;
 import org.resign.backend.gateway.ApiGatewayProxyResponse;
 import org.resign.backend.gateway.ApiGatewayRequest;
 
@@ -13,7 +13,7 @@ import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.amazonaws.util.StringUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-public class DeletePostHandler implements RequestHandler<ApiGatewayRequest, ApiGatewayProxyResponse> {
+public class UpdateTagHandler implements RequestHandler<ApiGatewayRequest, ApiGatewayProxyResponse> {
 
     @Override
     public ApiGatewayProxyResponse handleRequest(ApiGatewayRequest request, Context context) {
@@ -21,48 +21,44 @@ public class DeletePostHandler implements RequestHandler<ApiGatewayRequest, ApiG
     	context.getLogger().log("Request: " + request.toString());
 		ObjectMapper objectMapper = new ObjectMapper();
 
-    	Post post = null;
+    	Tag tag = null;
     	ApiGatewayProxyResponse response;
     	try {
-    		if(request.getQueryStringParameters() != null) {
-//				post = objectMapper.readValue(request.getBody(), Post.class);
-    			String userId = request.getQueryStringParameters().get("userId");
-    			String ts = request.getQueryStringParameters().get("ts");
-		    	if(!StringUtils.isNullOrEmpty(userId) && !StringUtils.isNullOrEmpty(ts)) {
+    		if(request.getBody() != null) {
+				tag = objectMapper.readValue(request.getBody(), Tag.class);
+		    	if(!StringUtils.isNullOrEmpty(tag.getUuid())) {
 		    		try {
 		    			AmazonDynamoDB ddb = AmazonDynamoDBClientBuilder.standard()
 			    				.withRegion(Regions.EU_WEST_3)
 			    				.build();
 			    		DynamoDBMapper mapper = new DynamoDBMapper(ddb);
-			    		post = mapper.load(Post.class, userId, ts);
-			    		mapper.delete(post);
-		    			response = new ApiGatewayProxyResponse(200, null, null);
+			    		mapper.save(tag);
+		    			response = new ApiGatewayProxyResponse(200, null, objectMapper.writeValueAsString(tag));
 		    			
 		    		} catch (Exception e) {
 		    			context.getLogger().log("Error: " + e.getMessage());
-		    			post = new Post();
-		    		    post.setError("An error occurred while deleting the post");
-		    		    response = new ApiGatewayProxyResponse(500, null, objectMapper.writeValueAsString(post));
+		    			tag = new Tag();
+		    		    tag.setError("An error occurred while updating the tag");
+		    		    response = new ApiGatewayProxyResponse(500, null, objectMapper.writeValueAsString(tag));
 		    		}
 		    		
 		    	} else {
-		    		post = new Post();
-		    		post.setError("Missing input parameters");
-	    			response = new ApiGatewayProxyResponse(500, null, objectMapper.writeValueAsString(post));
+		    		tag = new Tag();
+		    		tag.setError("Missing input parameters");
+	    			response = new ApiGatewayProxyResponse(500, null, objectMapper.writeValueAsString(tag));
 		    	}
     		} else {
-	    		post = new Post();
-	    		post.setError("Missing input parameters");
-	    		 response = new ApiGatewayProxyResponse(500, null, objectMapper.writeValueAsString(post));
+	    		tag = new Tag();
+	    		tag.setError("Missing input parameters");
+	    		 response = new ApiGatewayProxyResponse(500, null, objectMapper.writeValueAsString(tag));
 	    	}
     	} catch (Exception e) {
     		context.getLogger().log("Error: " + e.getMessage());
-//    		post = new Post();
-//		    post.setError("An error occurred while updating the tag");
+    		tag = new Tag();
+		    tag.setError("An error occurred while updating the tag");
 		    response = new ApiGatewayProxyResponse(500, null, "{\"error\":\"" 
-		    		+ "An error occurred while deleting the tag" + "\"}");
+		    		+ "An error occurred while updating the tag" + "\"}");
     	}
     	return response;
     }
-
 }

@@ -1,4 +1,4 @@
-package org.resign.backend;
+package org.resign.backend.lambda.blog;
 
 import java.util.ArrayList;
 import java.util.Collections;

@@ -1,4 +1,4 @@
-	package org.resign.backend;
+	package org.resign.backend.lambda.resource;
 	
 	import java.net.URL;
 import java.util.ArrayList;
@@ -22,7 +22,7 @@ import org.resign.backend.gateway.ApiGatewayProxyResponse;
 	import com.amazonaws.services.s3.model.GeneratePresignedUrlRequest;
 //	import com.amazonaws.util.Base64;
 
-	public class GenerateImageLinkHandler implements RequestHandler<ApiGatewayRequest, ApiGatewayProxyResponse> {
+	public class GenerateResourceImageLinkHandler implements RequestHandler<ApiGatewayRequest, ApiGatewayProxyResponse> {
 	
 		@Override
 		public ApiGatewayProxyResponse handleRequest(ApiGatewayRequest request, Context context) {

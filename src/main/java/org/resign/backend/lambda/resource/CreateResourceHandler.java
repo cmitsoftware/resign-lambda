@@ -1,8 +1,9 @@
-package org.resign.backend;
+package org.resign.backend.lambda.resource;
 
 import java.util.Date;
 
 import org.json.JSONObject;
+import org.resign.backend.Constants;
 import org.resign.backend.domain.Resource;
 import org.resign.backend.domain.User;
 import org.resign.backend.gateway.ApiGatewayProxyResponse;

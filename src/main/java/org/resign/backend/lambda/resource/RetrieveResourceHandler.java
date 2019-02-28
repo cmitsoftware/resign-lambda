@@ -1,4 +1,4 @@
-package org.resign.backend;
+package org.resign.backend.lambda.resource;
 
 import org.resign.backend.domain.Resource;
 import org.resign.backend.gateway.ApiGatewayProxyResponse;

@@ -5,6 +5,7 @@ import java.io.IOException;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.resign.backend.lambda.blog.UpdatePostHandler;
 
 import com.amazonaws.services.lambda.runtime.Context;
 
