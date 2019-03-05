@@ -13,8 +13,11 @@ public class TestVersioningHandler  implements RequestHandler<ApiGatewayRequest,
 	public ApiGatewayProxyResponse handleRequest(ApiGatewayRequest request, Context context) {
 		
 		context.getLogger().log("Request: " + request.toString());
-		String ret = "cerri at work - beta update 3";
+		String ret = "cerri at work - ";
+		ret += request.getStageVariables().get("functionVersion");
 		context.getLogger().log(ret);
+		
+		context.getLogger().log("Function version: " + ret);
 		
 		ApiGatewayProxyResponse response = new ApiGatewayProxyResponse(200, null, ret);
     	return response;

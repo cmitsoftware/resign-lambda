@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.resign.backend.Constants;
 import org.resign.backend.domain.Post;
 import org.resign.backend.gateway.ApiGatewayProxyResponse;
 import org.resign.backend.gateway.ApiGatewayRequest;
@@ -14,7 +15,9 @@ import com.amazonaws.regions.Regions;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapperConfig;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBQueryExpression;
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapperConfig.TableNameOverride;
 import com.amazonaws.services.dynamodbv2.model.AttributeValue;
 import com.amazonaws.services.dynamodbv2.model.ScanRequest;
 import com.amazonaws.services.dynamodbv2.model.ScanResult;
@@ -31,27 +34,34 @@ public class RetrievePostHandler implements RequestHandler<ApiGatewayRequest, Ap
     	context.getLogger().log("Request: " + request.toString());
 		context.getLogger().log("Identity id: " + context.getIdentity().getIdentityId());
     	
-    	String ps = null;
+    	String userId = null;
     	String ts = null;
     	if(request.getQueryStringParameters() != null) {
-    		ps = request.getQueryStringParameters().get("ps");
+    		userId = request.getQueryStringParameters().get("ps");
     		ts = request.getQueryStringParameters().get("ts");
     	}
 
+    	String tablePrefix = "";
+		String env = request.getStageVariables().get(Constants.ENVIRONMENT_STAGE_VARIABLE);
+		if(Constants.BETA.equals(env)) {
+			tablePrefix = Constants.DEV_TABLE_PREFIX;
+		}
+		DynamoDBMapperConfig config = DynamoDBMapperConfig.builder().withTableNameOverride(TableNameOverride.withTableNamePrefix(tablePrefix)).build();
+		
     	AmazonDynamoDB ddb = AmazonDynamoDBClientBuilder.standard()
 				.withRegion(Regions.EU_WEST_3)
 				.build();
-    	DynamoDBMapper mapper = new DynamoDBMapper(ddb);
+    	DynamoDBMapper mapper = new DynamoDBMapper(ddb, config);
     	
     	ObjectMapper objectMapper = new ObjectMapper();
     	String reply = null;
-    	if(!StringUtils.isNullOrEmpty(ps) && !StringUtils.isNullOrEmpty(ts)) {
+    	if(!StringUtils.isNullOrEmpty(userId) && !StringUtils.isNullOrEmpty(ts)) {
     		
-    		context.getLogger().log("ps: " + ps);
+    		context.getLogger().log("userId: " + userId);
     		context.getLogger().log("ts: " + ts);
     		
     		Post ret = null;
-    		ret = mapper.load(Post.class, ps, ts);
+    		ret = mapper.load(Post.class, userId, ts);
     		
     		if(ret == null) {
     			
@@ -75,7 +85,7 @@ public class RetrievePostHandler implements RequestHandler<ApiGatewayRequest, Ap
     			e.printStackTrace();
     		}
     		
-    	} else if(!StringUtils.isNullOrEmpty(ps)) {
+    	} else if(!StringUtils.isNullOrEmpty(userId)) {
     		
 //    		context.getLogger().log("ps: " + ps);
 //    		

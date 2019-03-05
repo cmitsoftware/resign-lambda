@@ -10,6 +10,8 @@ import com.amazonaws.regions.Regions;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapperConfig;
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapperConfig.TableNameOverride;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -39,7 +41,8 @@ public class CreateTagHandler implements RequestHandler<ApiGatewayRequest, ApiGa
 	    			AmazonDynamoDB ddb = AmazonDynamoDBClientBuilder.standard()
 	    					.withRegion(Regions.EU_WEST_3)
 	    					.build();
-	    			DynamoDBMapper mapper = new DynamoDBMapper(ddb);
+	    			DynamoDBMapperConfig config = DynamoDBMapperConfig.builder().withTableNameOverride(TableNameOverride.withTableNamePrefix("dev-")).build();
+	    			DynamoDBMapper mapper = new DynamoDBMapper(ddb, config);
 	    			mapper.save(tag);
 	    			response = new ApiGatewayProxyResponse(200, null, objectMapper.writeValueAsString(tag));
 	    			
