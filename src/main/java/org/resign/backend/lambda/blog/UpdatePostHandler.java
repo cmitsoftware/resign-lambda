@@ -35,7 +35,7 @@ public class UpdatePostHandler implements RequestHandler<ApiGatewayRequest, ApiG
 		    			String tablePrefix = "";
 		    			String env = request.getStageVariables().get(Constants.ENVIRONMENT_STAGE_VARIABLE);
 		    			if(Constants.BETA.equals(env)) {
-		    				tablePrefix = Constants.DEV_TABLE_PREFIX;
+		    				tablePrefix = Constants.DEV_TABLE_PREFIX + "-";
 		    			}
 		    			DynamoDBMapperConfig config = DynamoDBMapperConfig.builder().withTableNameOverride(TableNameOverride.withTableNamePrefix(tablePrefix)).build();
 		    			

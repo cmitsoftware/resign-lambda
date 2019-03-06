@@ -8,6 +8,7 @@ import java.util.UUID;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.resign.backend.Constants;
 import org.resign.backend.gateway.ApiGatewayProxyResponse;
 import org.resign.backend.gateway.ApiGatewayRequest;
 
@@ -85,6 +86,13 @@ public class GeneratePostImageLinkHandler implements RequestHandler<ApiGatewayRe
 			expiration.setTime(expTimeMillis);
 			
 			String imageKey = bucketFolderKey + "/" + UUID.randomUUID().toString();
+			
+			String env = request.getStageVariables().get(Constants.ENVIRONMENT_STAGE_VARIABLE);
+			if(Constants.BETA.equals(env)) {
+				imageKey = Constants.DEV_BUCKET_PREFIX + imageKey;
+			} else {
+				imageKey = Constants.PROD_BUCKET_PREFIX + imageKey;
+			}
 	
 			// Generate the presigned URL.
 			GeneratePresignedUrlRequest generatePresignedUrlRequest = 
