@@ -20,6 +20,8 @@ import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBQueryExpression;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBScanExpression;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapperConfig.TableNameOverride;
 import com.amazonaws.services.dynamodbv2.model.AttributeValue;
+import com.amazonaws.services.dynamodbv2.model.ComparisonOperator;
+import com.amazonaws.services.dynamodbv2.model.Condition;
 import com.amazonaws.services.dynamodbv2.model.ScanRequest;
 import com.amazonaws.services.dynamodbv2.model.ScanResult;
 import com.amazonaws.services.lambda.runtime.Context;
@@ -28,7 +30,7 @@ import com.amazonaws.util.StringUtils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-public class RetrievePostHandler implements RequestHandler<ApiGatewayRequest, ApiGatewayProxyResponse> {
+public class RetrievePublicPostHandler implements RequestHandler<ApiGatewayRequest, ApiGatewayProxyResponse> {
 
     public ApiGatewayProxyResponse handleRequest(ApiGatewayRequest request, Context context) {
     	
@@ -64,13 +66,13 @@ public class RetrievePostHandler implements RequestHandler<ApiGatewayRequest, Ap
     		Post ret = null;
     		ret = mapper.load(Post.class, userId, ts);
     		
-    		if(ret == null) {
+    		if(ret == null || !Post.STATUS_PUBLISHED.equals(ret.getPs())) {
     			
     			ret = new Post();
         		ret.setError("Post not found");
         		
     		} else {
-
+    			
     			Integer views = ret.getViews();
     			if(views == null) {
     				views = 0;
@@ -90,11 +92,11 @@ public class RetrievePostHandler implements RequestHandler<ApiGatewayRequest, Ap
     		
     	} else {
     		
-            DynamoDBScanExpression scanExpression = new DynamoDBScanExpression();
-            List<Post> posts = mapper.scan(Post.class, scanExpression);
-    		
-//            ScanRequest scanRequest = new ScanRequest()
+//    		ScanRequest scanRequest = new ScanRequest()
 //    			    .withTableName("post");
+//    		Condition statusCondition = new Condition();
+//    		statusCondition.setComparisonOperator(ComparisonOperator.EQ);
+//    		scanRequest.addScanFilterEntry("ps", statusCondition);
 //    		ScanResult scanResult = ddb.scan(scanRequest);
 //    		List<Post> posts = new ArrayList<Post>();
 //    		for (Map<String, AttributeValue> item : scanResult.getItems()){
@@ -105,6 +107,13 @@ public class RetrievePostHandler implements RequestHandler<ApiGatewayRequest, Ap
 //				}
 //    		}
 //    		Collections.reverse(posts);
+    		
+    		Map<String, AttributeValue> eav = new HashMap<String, AttributeValue>();
+            eav.put(":status", new AttributeValue().withS(Post.STATUS_PUBLISHED));
+            
+    		DynamoDBScanExpression scanExpression = new DynamoDBScanExpression()
+    				.withFilterExpression(Post.PS + " = :status").withExpressionAttributeValues(eav);
+            List<Post> posts = mapper.scan(Post.class, scanExpression);
     		
     		try {
     			reply = objectMapper.writeValueAsString(posts);
