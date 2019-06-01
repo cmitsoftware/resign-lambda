@@ -25,10 +25,11 @@ public class Post extends ApiResponse {
 	public static final String PS = "ps";
 	public static final String TITLE = "title";
 	public static final String TEXT = "text";
+	public static final String SLUG = "slug";
+	public static final String CATEGORY = "category";
 	public static final String IMAGES = "images";
 	public static final String VIEWS = "views";
 	public static final String LIKES = "likes";
-	
 	
 	@JsonInclude(JsonInclude.Include.NON_NULL)
 	private String userId;
@@ -40,6 +41,10 @@ public class Post extends ApiResponse {
 	private String title;
 	@JsonInclude(JsonInclude.Include.NON_NULL)
 	private String text;
+	@JsonInclude(JsonInclude.Include.NON_NULL)
+	private String slug;
+	@JsonInclude(JsonInclude.Include.NON_NULL)
+	private String category;
 	@JsonInclude(JsonInclude.Include.NON_NULL)
 	private Integer views;
 	@JsonInclude(JsonInclude.Include.NON_NULL)
@@ -88,6 +93,12 @@ public class Post extends ApiResponse {
 		}
 		if(sourceMap.containsKey(TEXT)) {
 			p.setText(sourceMap.get(TEXT).getS());
+		}
+		if(sourceMap.containsKey(SLUG)) {
+			p.setSlug(sourceMap.get(SLUG).getS());
+		}
+		if(sourceMap.containsKey(CATEGORY)) {
+			p.setCategory(sourceMap.get(CATEGORY).getS());
 		}
 		if(sourceMap.containsKey(VIEWS)) {
 			p.setViews(Integer.parseInt(sourceMap.get(VIEWS).getN()));
@@ -149,6 +160,24 @@ public class Post extends ApiResponse {
 
 	public void setText(String text) {
 		this.text = text;
+	}
+
+	@DynamoDBAttribute
+	public String getSlug() {
+		return slug;
+	}
+
+	public void setSlug(String slug) {
+		this.slug = slug;
+	}
+
+	@DynamoDBAttribute
+	public String getCategory() {
+		return category;
+	}
+
+	public void setCategory(String category) {
+		this.category = category;
 	}
 
 	@DynamoDBAttribute
