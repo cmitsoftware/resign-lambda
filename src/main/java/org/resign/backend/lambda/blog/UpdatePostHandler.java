@@ -1,9 +1,12 @@
 package org.resign.backend.lambda.blog;
 
+import java.util.ArrayList;
+
 import org.resign.backend.Constants;
 import org.resign.backend.domain.Post;
 import org.resign.backend.gateway.ApiGatewayProxyResponse;
 import org.resign.backend.gateway.ApiGatewayRequest;
+import org.resign.backend.lambda.ResignHandler;
 
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
@@ -12,63 +15,82 @@ import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapperConfig;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapperConfig.TableNameOverride;
 import com.amazonaws.services.lambda.runtime.Context;
-import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.amazonaws.util.StringUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-public class UpdatePostHandler implements RequestHandler<ApiGatewayRequest, ApiGatewayProxyResponse> {
+public class UpdatePostHandler extends ResignHandler { 
+//implements RequestHandler<ApiGatewayRequest, ApiGatewayProxyResponse> {
 
+	Context context = null;
+	String env = null;
+	
     @Override
     public ApiGatewayProxyResponse handleRequest(ApiGatewayRequest request, Context context) {
     	
-    	context.getLogger().log("Request: " + request.toString());
-		ObjectMapper objectMapper = new ObjectMapper();
+    	this.context = context;
+		this.env = request.getStageVariables().get(Constants.ENVIRONMENT_STAGE_VARIABLE);
+		
+		context.getLogger().log("Request: " + request.toString());
+		Post post = null;
+		ApiGatewayProxyResponse response;
+		
+		try {
+			
+			String tablePrefix = "";
+			String env = request.getStageVariables().get(Constants.ENVIRONMENT_STAGE_VARIABLE);
+			if(Constants.BETA.equals(env)) {
+				tablePrefix = Constants.DEV_TABLE_PREFIX + "-";
+			}
+			DynamoDBMapperConfig config = DynamoDBMapperConfig.builder().withTableNameOverride(TableNameOverride.withTableNamePrefix(tablePrefix)).build();
+			
+			AmazonDynamoDB ddb = AmazonDynamoDBClientBuilder.standard()
+					.withRegion(Regions.EU_WEST_3)
+					.build();
+			DynamoDBMapper mapper = new DynamoDBMapper(ddb, config);
+			
+			ObjectMapper objectMapper = new ObjectMapper();
 
-    	Post post = null;
-    	ApiGatewayProxyResponse response;
-    	try {
     		if(request.getBody() != null) {
 				post = objectMapper.readValue(request.getBody(), Post.class);
-		    	if(!StringUtils.isNullOrEmpty(post.getUserId()) && !StringUtils.isNullOrEmpty(post.getTs())) {
-		    		try {
-		    			
-		    			String tablePrefix = "";
-		    			String env = request.getStageVariables().get(Constants.ENVIRONMENT_STAGE_VARIABLE);
-		    			if(Constants.BETA.equals(env)) {
-		    				tablePrefix = Constants.DEV_TABLE_PREFIX + "-";
-		    			}
-		    			DynamoDBMapperConfig config = DynamoDBMapperConfig.builder().withTableNameOverride(TableNameOverride.withTableNamePrefix(tablePrefix)).build();
-		    			
-		    			AmazonDynamoDB ddb = AmazonDynamoDBClientBuilder.standard()
-			    				.withRegion(Regions.EU_WEST_3)
-			    				.build();
-			    		DynamoDBMapper mapper = new DynamoDBMapper(ddb, config);
-			    		mapper.save(post);
-		    			response = new ApiGatewayProxyResponse(200, null, objectMapper.writeValueAsString(post));
-		    			
-		    		} catch (Exception e) {
-		    			context.getLogger().log("Error: " + e.getMessage());
-		    			post = new Post();
-		    		    post.setError("An error occurred while updating the post");
-		    		    response = new ApiGatewayProxyResponse(500, null, objectMapper.writeValueAsString(post));
-		    		}
-		    		
-		    	} else {
-		    		post = new Post();
-		    		post.setError("Missing input parameters");
-	    			response = new ApiGatewayProxyResponse(500, null, objectMapper.writeValueAsString(post));
-		    	}
-    		} else {
-	    		post = new Post();
-	    		post.setError("Missing input parameters");
-	    		 response = new ApiGatewayProxyResponse(500, null, objectMapper.writeValueAsString(post));
 	    	}
+    		if(post == null) {
+	    		response = new ApiGatewayProxyResponse(406, null, "{\"error\":\"" 
+			    		+ "Missing input parameters" + "\"}");
+	    	}
+    		if(StringUtils.isNullOrEmpty(post.getUserId()) || StringUtils.isNullOrEmpty(post.getTs())) {
+    			response = new ApiGatewayProxyResponse(406, null, "{\"error\":\"" 
+			    		+ "Missing input parameters" + "\"}");
+	    	}
+    		/*
+    		 * TODO
+    		 * Delete old images 
+    		 */
+    		mapper.save(post);
+			
+    		if(post.getImages() == null) {
+				post.setImages(new ArrayList<String>());
+			}
+			if(post.getNewImages() != null) {
+				for(String newImage: post.getNewImages()) {
+					try {
+						post.getImages().add(uploadImageToS3(post, newImage));
+					} catch (Exception e) {
+						context.getLogger().log("Error: " + e.getMessage());
+					}
+				}
+				post.setNewImages(new ArrayList<String>());
+			}
+			
+			mapper.save(post);
+			response = new ApiGatewayProxyResponse(200, null, objectMapper.writeValueAsString(post));
+			
+    		
+    		response = new ApiGatewayProxyResponse(200, null, objectMapper.writeValueAsString(post));
+    		
     	} catch (Exception e) {
     		context.getLogger().log("Error: " + e.getMessage());
-//    		post = new Post();
-//		    post.setError("An error occurred while updating the tag");
 		    response = new ApiGatewayProxyResponse(500, null, "{\"error\":\"" 
-		    		+ "An error occurred while updating the tag" + "\"}");
+		    		+ "An error occurred while updating the post" + "\"}");
     	}
     	return response;
     }

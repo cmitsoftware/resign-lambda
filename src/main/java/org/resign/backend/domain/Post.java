@@ -12,6 +12,7 @@ import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBHashKey;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBRangeKey;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTable;
 import com.amazonaws.services.dynamodbv2.model.AttributeValue;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 @DynamoDBTable(tableName = "post")
@@ -28,6 +29,7 @@ public class Post extends ApiResponse {
 	public static final String SLUG = "slug";
 	public static final String CATEGORY = "category";
 	public static final String IMAGES = "images";
+//	public static final String NEW_IMAGES = "newImages";
 	public static final String VIEWS = "views";
 	public static final String LIKES = "likes";
 	
@@ -52,33 +54,15 @@ public class Post extends ApiResponse {
 	@JsonInclude(JsonInclude.Include.NON_NULL)
 	private List<String> images;
 	
-//	@SuppressWarnings("unchecked")
-//	public static Post buildFromMap(Map<String, Object> sourceMap) throws Exception {
-//		
-//		Post p = new Post();
-//		p.setUserId((String)sourceMap.get(USER_ID));
-//		p.setTs(((String)sourceMap.get(TS)));
-//		if(sourceMap.containsKey(PS)) {
-//			p.setPs(((String)sourceMap.get(PS)));
-//		}
-//		if(sourceMap.containsKey(TITLE)) {
-//			p.setTitle((String)sourceMap.get(TITLE));
-//		}
-//		if(sourceMap.containsKey(TEXT)) {
-//			p.setText((String)sourceMap.get(TEXT));
-//		}
-//		if(sourceMap.containsKey(VIEWS)) {
-//			p.setViews((Integer)sourceMap.get(VIEWS));
-//		}
-//		if(sourceMap.containsKey(LIKES)) {
-//			p.setLikes((Integer)sourceMap.get(LIKES));
-//		}
-//		if(sourceMap.containsKey(IMAGE)) {
-//			p.setImage((String)sourceMap.get(IMAGE));
-//		}
-//		
-//		return p;
-//	}
+	@JsonInclude(JsonInclude.Include.NON_NULL)
+	private List<String> newImages;
+	
+	@Override
+	public String toString() {
+		return "Post [userId=" + userId + ", ts=" + ts + ", ps=" + ps + ", title=" + title + ", text=" + text
+				+ ", slug=" + slug + ", category=" + category + ", views=" + views + ", likes=" + likes + ", images="
+				+ images + ", newImages=" + newImages + "]";
+	}
 
 	public static Post buildFromAttributeMap(Map<String, AttributeValue> sourceMap) throws Exception {
 		
@@ -113,6 +97,13 @@ public class Post extends ApiResponse {
 			}
 			p.setImages(images);
 		}
+//		if(sourceMap.containsKey(NEW_IMAGES)) {
+//			List<String> newImages = new ArrayList<String>();
+//			for(AttributeValue v: sourceMap.get(NEW_IMAGES).getL()) {
+//				newImages.add(v.getS());
+//			}
+//			p.setNewImages(newImages);
+//		}
 		
 		return p;
 	}
@@ -207,5 +198,12 @@ public class Post extends ApiResponse {
 		this.images = images;
 	}
 
-	
+	@DynamoDBAttribute
+	public List<String> getNewImages() {
+		return newImages;
+	}
+
+	public void setNewImages(List<String> newImages) {
+		this.newImages = newImages;
+	}
 }
