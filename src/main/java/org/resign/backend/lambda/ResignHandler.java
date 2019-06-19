@@ -22,11 +22,23 @@ public abstract class ResignHandler implements RequestHandler<ApiGatewayRequest,
 
 	protected Context context = null;
 	protected String env = null;
+	protected String clientRegion = null;
+	protected String bucketName = null;
 	
-	protected String uploadImageToS3(Post post, String base64Image) {
+	protected void init(ApiGatewayRequest request, Context context) {
 		
+		this.context = context;
+		this.env = request.getStageVariables().get(Constants.ENVIRONMENT_STAGE_VARIABLE);
+		this.clientRegion = System.getenv("S3_BUCKET_REGION");
+		context.getLogger().log("Bucket region: " + clientRegion);
+		this.bucketName = System.getenv("S3_BUCKET_NAME");
+		context.getLogger().log("Bucket name: " + bucketName);
+	
+	}
+
+	protected String uploadImageToS3(Post post, String base64Image) {
+	
 		String mimeType = extractMimeTypeFromBase64Image(base64Image);
-		context.getLogger().log("Mime: " + mimeType);
 		
 		String imageS3Key = post.getUserId() + "/" + post.getTs() + "/" + UUID.randomUUID().toString();
 		if(Constants.BETA.equals(env)) {
@@ -36,16 +48,10 @@ public abstract class ResignHandler implements RequestHandler<ApiGatewayRequest,
 		}
 		context.getLogger().log("S3 key: " + imageS3Key);
 		
-		
 		byte[] bas64ImageBytes = Base64.decodeBase64((base64Image.substring(base64Image.indexOf(",")+1)).getBytes());
 
 		InputStream fis = new ByteArrayInputStream(bas64ImageBytes);
 
-		String clientRegion = System.getenv("S3_BUCKET_REGION");
-		context.getLogger().log("Bucket region: " + clientRegion);
-		String bucketName = System.getenv("S3_BUCKET_NAME");
-		context.getLogger().log("Bucket name: " + bucketName);
-		
 		AmazonS3 s3Client = AmazonS3ClientBuilder.standard()
                 .withRegion(clientRegion)
                 .withCredentials(DefaultAWSCredentialsProviderChain.getInstance())
@@ -66,11 +72,12 @@ public abstract class ResignHandler implements RequestHandler<ApiGatewayRequest,
 		try {
 			String base64Payload = base64Image.substring(0, base64Image.indexOf(",")+1);
 			String mimeType = base64Payload.substring(0, base64Payload.indexOf(";")).substring(5);
+			context.getLogger().log("Mime type: " + mimeType);
 			return mimeType;
 		} catch (Exception e) {
 			context.getLogger().log("Can't get mime type: " + e.getMessage());			
+			return "image/png";
 		}
-		return "image/png";
 	}
 
 }

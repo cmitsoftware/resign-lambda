@@ -19,16 +19,11 @@ import com.amazonaws.util.StringUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class UpdatePostHandler extends ResignHandler { 
-//implements RequestHandler<ApiGatewayRequest, ApiGatewayProxyResponse> {
 
-	Context context = null;
-	String env = null;
-	
     @Override
     public ApiGatewayProxyResponse handleRequest(ApiGatewayRequest request, Context context) {
     	
-    	this.context = context;
-		this.env = request.getStageVariables().get(Constants.ENVIRONMENT_STAGE_VARIABLE);
+		init(request, context);
 		
 		context.getLogger().log("Request: " + request.toString());
 		Post post = null;
@@ -63,18 +58,21 @@ public class UpdatePostHandler extends ResignHandler {
 	    	}
     		/*
     		 * TODO
-    		 * Delete old images 
+    		 * Delete no more used images from s3 
     		 */
     		mapper.save(post);
-			
+
     		if(post.getImages() == null) {
 				post.setImages(new ArrayList<String>());
 			}
 			if(post.getNewImages() != null) {
+				context.getLogger().log("Will upload " + post.getNewImages().size() + " new images");
 				for(String newImage: post.getNewImages()) {
 					try {
-						post.getImages().add(uploadImageToS3(post, newImage));
+						String imageS3Key = uploadImageToS3(post, newImage);
+						post.getImages().add(imageS3Key);
 					} catch (Exception e) {
+						e.printStackTrace();
 						context.getLogger().log("Error: " + e.getMessage());
 					}
 				}
@@ -82,9 +80,6 @@ public class UpdatePostHandler extends ResignHandler {
 			}
 			
 			mapper.save(post);
-			response = new ApiGatewayProxyResponse(200, null, objectMapper.writeValueAsString(post));
-			
-    		
     		response = new ApiGatewayProxyResponse(200, null, objectMapper.writeValueAsString(post));
     		
     	} catch (Exception e) {
